@@ -1,0 +1,231 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100..900;1,100..900&family=Inter:ital,wght@0,300..950;1,300..950&family=Space+Grotesk:wght@300..700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Outfit:wght@300..900&family=Cinzel:wght@400;600;700;900&display=swap');
+@import "tailwindcss";
+
+:root {
+  --elegant-gray-50: #fafafa;
+  --elegant-gray-100: #f4f4f5;
+  --elegant-gray-200: #e4e4e7;
+  --elegant-gray-300: #d4d4d8;
+  --elegant-gray-400: #a1a1aa;
+  --elegant-gray-500: #71717a;
+  --elegant-gray-600: #52525b;
+  --elegant-gray-700: #3f3f46;
+  --elegant-gray-800: #27272a;
+  --elegant-gray-900: #18181b;
+  --elegant-gray-950: #09090b;
+}
+
+.dark {
+  --elegant-gray-50: #fafafa;
+  --elegant-gray-100: #f4f4f5;
+  --elegant-gray-200: #e4e4e7;
+  --elegant-gray-300: #d4d4d8;
+  --elegant-gray-400: #a1a1aa;
+  --elegant-gray-500: #71717a;
+  --elegant-gray-600: #52525b;
+  --elegant-gray-700: #3f3f46;
+  --elegant-gray-800: #27272a;
+  --elegant-gray-900: #18181b;
+  --elegant-gray-950: #09090b;
+}
+
+@theme {
+  --font-sans: "Poppins", sans-serif;
+  --font-display: "Poppins", sans-serif;
+  --font-mono: "Poppins", sans-serif;
+  --font-roman: "Poppins", sans-serif;
+  
+  /* Overriding high-saturation colorful classes with an elegant, strict Blue, White, and Black palette */
+  --color-amber-850: #2563eb;
+  --color-blue-100: #eff6ff;
+  --color-blue-200: #dbeafe;
+  --color-blue-300: #bfdbfe;
+  --color-blue-400: #93c5fd;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-blue-700: #1d4ed8;
+  --color-blue-800: #1e40af;
+  --color-blue-900: #1e3a8a;
+  
+  --color-indigo-100: #eff6ff;
+  --color-indigo-200: #dbeafe;
+  --color-indigo-300: #bfdbfe;
+  --color-indigo-400: #93c5fd;
+  --color-indigo-500: #3b82f6;
+  --color-indigo-600: #2563eb;
+  
+  --color-purple-100: #eff6ff;
+  --color-purple-200: #dbeafe;
+  --color-purple-300: #bfdbfe;
+  --color-purple-400: #93c5fd;
+  --color-purple-500: #3b82f6;
+  --color-purple-600: #2563eb;
+  
+  --color-teal-100: #eff6ff;
+  --color-teal-200: #dbeafe;
+  --color-teal-300: #bfdbfe;
+  --color-teal-400: #93c5fd;
+  --color-teal-500: #3b82f6;
+  --color-teal-600: #2563eb;
+  
+  --color-cyan-300: #bfdbfe;
+  --color-cyan-400: #93c5fd;
+  --color-cyan-500: #3b82f6;
+  --color-cyan-600: #2563eb;
+  
+  /* Map all grays to dynamic variables for extreme elegant uniformity */
+  --color-gray-50: var(--elegant-gray-50);
+  --color-gray-100: var(--elegant-gray-100);
+  --color-gray-200: var(--elegant-gray-200);
+  --color-gray-300: var(--elegant-gray-300);
+  --color-gray-400: var(--elegant-gray-400);
+  --color-gray-500: var(--elegant-gray-500);
+  --color-gray-600: var(--elegant-gray-600);
+  --color-gray-700: var(--elegant-gray-700);
+  --color-gray-800: var(--elegant-gray-800);
+  --color-gray-900: var(--elegant-gray-900);
+  --color-gray-950: var(--elegant-gray-950);
+
+  --color-zinc-50: var(--elegant-gray-50);
+  --color-zinc-100: var(--elegant-gray-100);
+  --color-zinc-200: var(--elegant-gray-200);
+  --color-zinc-300: var(--elegant-gray-300);
+  --color-zinc-400: var(--elegant-gray-400);
+  --color-zinc-500: var(--elegant-gray-500);
+  --color-zinc-600: var(--elegant-gray-600);
+  --color-zinc-700: var(--elegant-gray-700);
+  --color-zinc-800: var(--elegant-gray-800);
+  --color-zinc-900: var(--elegant-gray-900);
+  --color-zinc-950: var(--elegant-gray-950);
+
+  --color-slate-50: var(--elegant-gray-50);
+  --color-slate-100: var(--elegant-gray-100);
+  --color-slate-200: var(--elegant-gray-200);
+  --color-slate-300: var(--elegant-gray-300);
+  --color-slate-400: var(--elegant-gray-400);
+  --color-slate-500: var(--elegant-gray-500);
+  --color-slate-600: var(--elegant-gray-600);
+  --color-slate-700: var(--elegant-gray-700);
+  --color-slate-800: var(--elegant-gray-800);
+  --color-slate-900: var(--elegant-gray-900);
+  --color-slate-950: var(--elegant-gray-950);
+
+  --color-neutral-50: var(--elegant-gray-50);
+  --color-neutral-100: var(--elegant-gray-100);
+  --color-neutral-200: var(--elegant-gray-200);
+  --color-neutral-300: var(--elegant-gray-300);
+  --color-neutral-400: var(--elegant-gray-400);
+  --color-neutral-500: var(--elegant-gray-500);
+  --color-neutral-600: var(--elegant-gray-600);
+  --color-neutral-700: var(--elegant-gray-700);
+  --color-neutral-800: var(--elegant-gray-800);
+  --color-neutral-900: var(--elegant-gray-900);
+  --color-neutral-950: var(--elegant-gray-950);
+
+  --color-stone-50: var(--elegant-gray-50);
+  --color-stone-100: var(--elegant-gray-100);
+  --color-stone-200: var(--elegant-gray-200);
+  --color-stone-300: var(--elegant-gray-300);
+  --color-stone-400: var(--elegant-gray-400);
+  --color-stone-500: var(--elegant-gray-500);
+  --color-stone-600: var(--elegant-gray-600);
+  --color-stone-700: var(--elegant-gray-700);
+  --color-stone-800: var(--elegant-gray-800);
+  --color-stone-900: var(--elegant-gray-900);
+  --color-stone-950: var(--elegant-gray-950);
+  
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-blob-spin: blob-spin 25s linear infinite;
+  --animate-blob-spin-reverse: blob-spin-reverse 30s linear infinite;
+}
+
+@keyframes blob-spin {
+  0% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+  33% { transform: translate(40px, -60px) scale(1.1) rotate(120deg); }
+  66% { transform: translate(-30px, 30px) scale(0.92) rotate(240deg); }
+  100% { transform: translate(0px, 0px) scale(1) rotate(360deg); }
+}
+
+@keyframes blob-spin-reverse {
+  0% { transform: translate(0px, 0px) scale(1) rotate(360deg); }
+  33% { transform: translate(-40px, 40px) scale(0.88) rotate(240deg); }
+  66% { transform: translate(50px, -30px) scale(1.12) rotate(120deg); }
+  100% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+}
+
+/* Global Transition & Properties */
+html, body {
+  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+/* Custom modern scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.25);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.45);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Glassmorphism panel styling helper classes - Liquid Glass Edition */
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.04), 
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 2px 0 rgba(255, 255, 255, 0.3);
+}
+
+.glass-panel-dark {
+  background: rgba(10, 11, 16, 0.55);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 24px 48px -12px rgba(0, 0, 0, 0.6), 
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Glass interactive items */
+.glass-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.08);
+}
+.dark .glass-hover:hover {
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* Selection and focus styling */
+::selection {
+  background-color: rgba(37, 99, 235, 0.25);
+  color: inherit;
+}
+
+/* Set standard Poppins font globally on all elements except monospace/code */
+*, *::before, *::after, body, button, input, select, textarea, span, p, h1, h2, h3, h4, h5, h6, a, label, li, ul, ol, div {
+  font-family: "Poppins", sans-serif !important;
+}
+
+/* Permit true monospace fonts for designated technical/billboard areas */
+.font-mono, .font-mono *, code, pre, .mono-text {
+  font-family: "JetBrains Mono", "Fira Code", monospace !important;
+}
