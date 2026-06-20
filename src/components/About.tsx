@@ -13,6 +13,23 @@ export default function About({ isDark, triggerHaptic }: AboutProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isClosed, setIsClosed] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [imageIndex, setImageIndex] = useState(0);
+
+  const imageSources = [
+    "/me.jpg",
+    "/profile_avatar.jpg",
+    "/me.png",
+    "/profile_avatar.png"
+  ];
+
+  const handleImageError = () => {
+    if (imageIndex < imageSources.length - 1) {
+      setImageIndex(prev => prev + 1);
+    } else {
+      setImageError(true);
+    }
+  };
 
   // 3D Parallax Mouse Tracking on Portrait Card
   const x = useMotionValue(0);
@@ -168,71 +185,73 @@ export default function About({ isDark, triggerHaptic }: AboutProps) {
                   {/* Avatar Frame holding representation */}
                   <div className="relative h-full w-full rounded-full overflow-hidden bg-gradient-to-b from-[#cba358]/20 via-[#dfc38a]/10 to-transparent flex items-center justify-center">
                     
-                    {/* Abstract Portrait SVG Representation of developer student */}
-                    <svg viewBox="0 0 100 100" className="w-[85%] h-[85%] rounded-full select-none" referrerPolicy="no-referrer">
-                      <defs>
-                        <linearGradient id="skinG" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#ffdbb5" />
-                          <stop offset="100%" stopColor="#f5af73" />
-                        </linearGradient>
-                        <linearGradient id="hairG" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#1e293b" />
-                          <stop offset="100%" stopColor="#0f172a" />
-                        </linearGradient>
-                        <linearGradient id="shirtG" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#cba358" />
-                          <stop offset="100%" stopColor="#a37c35" />
-                        </linearGradient>
-                      </defs>
-                      
-                      {/* Grid background network */}
-                      <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="0.3" className={isDark ? 'text-white/5' : 'text-black/5'} />
-                      <line x1="10" y1="50" x2="90" y2="50" stroke="currentColor" strokeWidth="0.15" className={isDark ? 'text-white/5' : 'text-black/5'} />
-                      <line x1="50" y1="10" x2="50" y2="90" stroke="currentColor" strokeWidth="0.15" className={isDark ? 'text-white/5' : 'text-black/5'} />
-                      
-                      {/* Shoulders / Shirt */}
-                      <path d="M15,90 Q15,64 50,64 Q85,64 85,90 Z" fill="url(#shirtG)" />
-                      <path d="M50,64 L50,75" stroke="#1d4ed8" strokeWidth="1" />
-                      
-                      {/* Neck */}
-                      <rect x="44" y="52" width="12" height="15" rx="3" fill="url(#skinG)" />
-                      
-                      {/* Face */}
-                      <circle cx="50" cy="40" r="15" fill="url(#skinG)" />
-                      
-                      {/* Hair */}
-                      <path d="M34,38 Q50,22 66,38 Q66,28 60,25 Q50,23 40,25 Q34,28 34,38 Z" fill="url(#hairG)" />
-                      <path d="M34,36 Q38,28 50,28 Q62,28 66,36 Q68,43 65,47 Q65,41 62,38 L60,38 Q58,42 50,42 Q42,42 40,38 L38,38 Q35,41 35,47 Q32,43 34,36 Z" fill="url(#hairG)" />
-                      
-                      {/* Glasses (representing student layout in image) */}
-                      <rect x="38" y="36" width="10" height="7" rx="1.5" fill="none" stroke="#e2e8f0" strokeWidth="0.8" />
-                      <rect x="52" y="36" width="10" height="7" rx="1.5" fill="none" stroke="#e2e8f0" strokeWidth="0.8" />
-                      <line x1="48" y1="39" x2="52" y2="39" stroke="#e2e8f0" strokeWidth="0.8" />
-                      
-                      {/* Eyes behind glasses */}
-                      <circle cx="43" cy="39" r="1" fill="#1e293b" />
-                      <circle cx="57" cy="39" r="1" fill="#1e293b" />
-                      
-                      {/* Smile */}
-                      <path d="M46,47 Q50,51 54,47" fill="none" stroke="#1e293b" strokeWidth="0.8" strokeLinecap="round" />
-                      
-                      {/* Highlights */}
-                      <circle cx="68" cy="22" r="2" fill="#60a5fa" className="animate-pulse" />
-                      <circle cx="30" cy="65" r="1.5" fill="#3b82f6" className="animate-pulse-slow" />
-                    </svg>
+                    {!imageError ? (
+                      <img
+                        src={imageSources[imageIndex]}
+                        alt="Rasendriya Khansa Jolankarfyan"
+                        className="w-full h-full object-cover rounded-full"
+                        onError={handleImageError}
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      /* Abstract Portrait SVG Representation of developer student */
+                      <svg viewBox="0 0 100 100" className="w-[85%] h-[85%] rounded-full select-none" referrerPolicy="no-referrer">
+                        <defs>
+                          <linearGradient id="skinG" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#ffdbb5" />
+                            <stop offset="100%" stopColor="#f5af73" />
+                          </linearGradient>
+                          <linearGradient id="hairG" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#1e293b" />
+                            <stop offset="100%" stopColor="#0f172a" />
+                          </linearGradient>
+                          <linearGradient id="shirtG" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#cba358" />
+                            <stop offset="150%" stopColor="#a37c35" />
+                          </linearGradient>
+                        </defs>
+                        
+                        {/* Grid background network */}
+                        <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="0.3" className={isDark ? 'text-white/5' : 'text-black/5'} />
+                        <line x1="10" y1="50" x2="90" y2="50" stroke="currentColor" strokeWidth="0.15" className={isDark ? 'text-white/5' : 'text-black/5'} />
+                        <line x1="50" y1="10" x2="50" y2="90" stroke="currentColor" strokeWidth="0.15" className={isDark ? 'text-white/5' : 'text-black/5'} />
+                        
+                        {/* Shoulders / Shirt */}
+                        <path d="M15,90 Q15,64 50,64 Q85,64 85,90 Z" fill="url(#shirtG)" />
+                        <path d="M50,64 L50,75" stroke="#1d4ed8" strokeWidth="1" />
+                        
+                        {/* Neck */}
+                        <rect x="44" y="52" width="12" height="15" rx="3" fill="url(#skinG)" />
+                        
+                        {/* Face */}
+                        <circle cx="50" cy="40" r="15" fill="url(#skinG)" />
+                        
+                        {/* Hair */}
+                        <path d="M34,38 Q50,22 66,38 Q66,28 60,25 Q50,23 40,25 Q34,28 34,38 Z" fill="url(#hairG)" />
+                        <path d="M34,36 Q38,28 50,28 Q62,28 66,36 Q68,43 65,47 Q65,41 62,38 L60,38 Q58,42 50,42 Q42,42 40,38 L38,38 Q35,41 35,47 Q32,43 34,36 Z" fill="url(#hairG)" />
+                        
+                        {/* Glasses (representing student layout in image) */}
+                        <rect x="38" y="36" width="10" height="7" rx="1.5" fill="none" stroke="#e2e8f0" strokeWidth="0.8" />
+                        <rect x="52" y="36" width="10" height="7" rx="1.5" fill="none" stroke="#e2e8f0" strokeWidth="0.8" />
+                        <line x1="48" y1="39" x2="52" y2="39" stroke="#e2e8f0" strokeWidth="0.8" />
+                        
+                        {/* Eyes behind glasses */}
+                        <circle cx="43" cy="39" r="1" fill="#1e293b" />
+                        <circle cx="57" cy="39" r="1" fill="#1e293b" />
+                        
+                        {/* Smile */}
+                        <path d="M46,47 Q50,51 54,47" fill="none" stroke="#1e293b" strokeWidth="0.8" strokeLinecap="round" />
+                        
+                        {/* Highlights */}
+                        <circle cx="68" cy="22" r="2" fill="#60a5fa" className="animate-pulse" />
+                        <circle cx="30" cy="65" r="1.5" fill="#3b82f6" className="animate-pulse-slow" />
+                      </svg>
+                    )}
 
                   </div>
                 </div>
 
-                {/* Floating particle markers */}
-                <div style={{ transform: 'translateZ(30px)' }} className="absolute -top-3 -right-3 h-8 w-8 rounded-xl bg-gradient-to-tr from-blue-500 to-blue-700 shadow-lg flex items-center justify-center text-white">
-                  <Sparkles size={14} className="animate-spin-slow" />
-                </div>
               </motion.div>
-
-              <span className={`text-[11px] font-mono mt-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                3D PARALLAX INTERACTION
-              </span>
             </div>
 
             {/* Bio/Paragraph Column */}

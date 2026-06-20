@@ -6,9 +6,9 @@ export const personalInfo = {
   email: "rasuen27@gmail.com",
   phone: "+62 881 0261 38014",
   location: "Pacitan, East Java, Indonesia",
-  roleDescription: "AI Data Annotator & Enthusiast | Computer Science Student | UI/UX Designer",
-  bio: "I am a Computer Science undergraduate student and a dedicated AI Data Annotator, motivated by a deep fascination with machine learning capabilities, language models, and modern AI development. Through high-level LLM and reinforcement learning (RLHF) annotations, I help align and elevate next-generation artificial intelligence technologies. I combine this technical AI curiosity with robust skills in programming, intuitive UI/UX design, and agile project management to build smart, highly interactive, and visually stunning digital experiences.",
-  quote: '"I blend elegant design aesthetics, robust computer science foundations, and intelligent AI-driven quality to deliver exceptional, future-proof digital utilities."',
+  roleDescription: "Computer Science Student | AI Data Annotator | UI/UX Designer",
+  bio: "I am a Computer Science undergraduate student working as an AI Data Annotator. I have a deep passion for web design, programming, and UI/UX design. In my role as an AI Data Annotator, I focus on dataset quality, precision labeling, and performance evaluation to support modern AI applications. I combine my experiences in computer science, interactive design, and structured workflows to build user-friendly, clean, and highly functional digital portfolios.",
+  quote: "“Imagination is more important than knowledge. For knowledge is limited to all we now know and understand, while imagination embraces the entire world, and all there ever will be to know and understand.” ― Albert Einstein",
   socials: {
     linkedin: "https://www.linkedin.com/in/rasendriya-khansa/",
     github: "https://github.com/rasenss",
@@ -71,7 +71,7 @@ export const skills: SkillItem[] = [
   {
     name: "AI Data Annotation & Evaluation",
     category: "Development",
-    description: "Experienced in high-quality text & image annotations, preference ranking, and reinforcement learning (RLHF) to align advanced machine learning models.",
+    description: "Experienced in performing highly accurate text & image annotations, data categorization, and user preference evaluations to ensure dataset quality and accuracy.",
     icon: "Sparkles",
     level: 90
   },

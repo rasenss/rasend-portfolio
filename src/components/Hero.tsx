@@ -84,16 +84,9 @@ function DecryptText({ text, startDelay = 0.3, trigger = 0 }: { text: string; st
 
 export default function Hero({ isDark, triggerHaptic }: HeroProps) {
   const [nameTrigger, setNameTrigger] = useState(0);
-  const [activeProfile, setActiveProfile] = useState<'dev' | 'ai'>('dev');
 
   const handleNameClick = () => {
     triggerHaptic();
-    setNameTrigger(prev => prev + 1);
-  };
-
-  const handleProfileChange = (profile: 'dev' | 'ai') => {
-    triggerHaptic();
-    setActiveProfile(profile);
     setNameTrigger(prev => prev + 1);
   };
 
@@ -113,9 +106,7 @@ export default function Hero({ isDark, triggerHaptic }: HeroProps) {
     }
   };
 
-  const marqueeText = activeProfile === 'dev'
-    ? "• RASENDRIYA KHANSA JOLANKARFYAN • DESIGNER & DEVELOPER • ARCHITECTURE & CODE • CREATIVE PORTFOLIO "
-    : "• RASENDRIYA KHANSA JOLANKARFYAN • AI DATA ANNOTATOR • LLM ALIGNMENT • RLHF SPECIALIST • DATA QUALITY & CURATION ";
+  const marqueeText = "• RASENDRIYA KHANSA JOLANKARFYAN • COMPUTER SCIENCE STUDENT • AI DATA ANNOTATOR • UI/UX DESIGNER • PORTFOLIO ";
 
   return (
     <section 
@@ -163,56 +154,6 @@ export default function Hero({ isDark, triggerHaptic }: HeroProps) {
             isDark ? 'glass-panel-dark' : 'glass-panel-light'
           }`}
         >
-          {/* Interactive Profile Tab Switcher */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ delay: 0.15, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="flex justify-center mb-6"
-          >
-            <div className={`p-1 rounded-full border flex items-center gap-1 relative ${
-              isDark ? 'bg-zinc-950/80 border-white/[0.05]' : 'bg-zinc-100/80 border-black/[0.05]'
-            }`}>
-              <button
-                onClick={() => handleProfileChange('dev')}
-                className={`relative px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all duration-300 flex items-center gap-1.5 ml-0.5 cursor-pointer z-10 ${
-                  activeProfile === 'dev'
-                    ? 'text-white'
-                    : isDark ? 'text-zinc-500 hover:text-zinc-300' : 'text-zinc-500 hover:text-zinc-800'
-                }`}
-              >
-                {activeProfile === 'dev' && (
-                  <motion.div
-                    layoutId="active-profile-bg"
-                    className="absolute inset-0 bg-blue-600 rounded-full -z-10"
-                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                  />
-                )}
-                <span className={`h-1.5 w-1.5 rounded-full bg-current ${activeProfile === 'dev' ? 'animate-pulse' : ''}`} />
-                Creative Dev
-              </button>
-              
-              <button
-                onClick={() => handleProfileChange('ai')}
-                className={`relative px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all duration-300 flex items-center gap-1.5 mr-0.5 cursor-pointer z-10 ${
-                  activeProfile === 'ai'
-                    ? 'text-white'
-                    : isDark ? 'text-zinc-500 hover:text-zinc-300' : 'text-zinc-500 hover:text-zinc-800'
-                }`}
-              >
-                {activeProfile === 'ai' && (
-                  <motion.div
-                    layoutId="active-profile-bg"
-                    className="absolute inset-0 bg-indigo-600 rounded-full -z-10"
-                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                  />
-                )}
-                <span className={`h-1.5 w-1.5 rounded-full bg-current ${activeProfile === 'ai' ? 'animate-pulse' : ''}`} />
-                AI Annotator
-              </button>
-            </div>
-          </motion.div>
-
           {/* Headline Name - Mechanical split-flap rolling billboard screen simulation */}
           <motion.h1
             id="hero-split-flap-title"
@@ -240,52 +181,31 @@ export default function Hero({ isDark, triggerHaptic }: HeroProps) {
           </motion.h1>
 
           {/* Subtitle / Focus Roles - Animated elegant responsive text block with layout switching */}
-          <div className="mb-8 mt-5 overflow-hidden flex justify-center h-8 items-center">
-            <AnimatePresence mode="wait">
-              {activeProfile === 'dev' ? (
-                <motion.p
-                  key="dev"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.35, ease: 'easeOut' }}
-                  className={`text-xs sm:text-base md:text-lg font-medium tracking-normal flex items-center justify-center ${
-                    isDark ? 'text-zinc-400' : 'text-zinc-650'
-                  }`}
-                >
-                  <span className="font-semibold uppercase select-none inline-block whitespace-nowrap">
-                    Student College
-                  </span>
-                  <span className="mx-2 sm:mx-3 text-blue-500 select-none inline-block font-bold">
-                    •
-                  </span>
-                  <span className="font-semibold uppercase select-none inline-block whitespace-nowrap">
-                    Designer & Developer
-                  </span>
-                </motion.p>
-              ) : (
-                <motion.p
-                  key="ai"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.35, ease: 'easeOut' }}
-                  className={`text-xs sm:text-base md:text-lg font-medium tracking-normal flex items-center justify-center ${
-                    isDark ? 'text-zinc-400' : 'text-zinc-650'
-                  }`}
-                >
-                  <span className="font-semibold uppercase select-none inline-block whitespace-nowrap">
-                    AI Data Annotator
-                  </span>
-                  <span className="mx-2 sm:mx-3 text-indigo-500 select-none inline-block font-bold animate-pulse">
-                    •
-                  </span>
-                  <span className="font-semibold uppercase select-none inline-block whitespace-nowrap">
-                    AI & ML Enthusiast
-                  </span>
-                </motion.p>
-              )}
-            </AnimatePresence>
+          <div className="mb-8 mt-6 overflow-hidden flex justify-center h-8 items-center">
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
+              className={`text-xs sm:text-base md:text-lg font-medium tracking-normal flex flex-wrap items-center justify-center gap-x-2 gap-y-1 min-[375px]:gap-x-3 ${
+                isDark ? 'text-zinc-400' : 'text-zinc-650'
+              }`}
+            >
+              <span className="font-semibold uppercase select-none whitespace-nowrap">
+                Student College
+              </span>
+              <span className="text-blue-500 select-none font-bold">
+                •
+              </span>
+              <span className="font-semibold uppercase select-none whitespace-nowrap">
+                AI Data Annotator
+              </span>
+              <span className="text-blue-500 select-none font-bold">
+                •
+              </span>
+              <span className="font-semibold uppercase select-none whitespace-nowrap">
+                UI/UX Designer
+              </span>
+            </motion.p>
           </div>
 
           {/* Start a Project Action Call button */}

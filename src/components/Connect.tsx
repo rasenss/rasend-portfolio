@@ -162,12 +162,23 @@ const QUESTIONABLE_POOL: Question[] = [
 ];
 
 export default function Connect({ isDark, triggerHaptic }: ConnectProps) {
+  // @ts-ignore
+  const rawFormId = import.meta.env.VITE_FORMSPREE_FORM_ID || "xjgdnzpw";
+  const formId = (() => {
+    let clean = String(rawFormId || "").trim();
+    if (clean.includes("/f/")) {
+      clean = clean.split("/f/").pop() || "";
+    }
+    return clean.replace(/[^a-zA-Z0-9]/g, "");
+  })();
+
   const [isClosed, setIsClosed] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   // --- CONTACT FORM STATE ---
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   // --- NEW ARCADE GAME STATE ENTRIES ---
   const [gameMode, setGameMode] = useState<'paradox' | 'schrodinger' | 'sentience'>('paradox');
@@ -242,26 +253,77 @@ export default function Connect({ isDark, triggerHaptic }: ConnectProps) {
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (submissionError) setSubmissionError(null);
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     triggerHaptic();
     if (!formData.name || !formData.email || !formData.message) return;
 
     setLoading(true);
-    // Simulate API form submission post
-    setTimeout(() => {
-      setLoading(false);
-      setFormSubmitted(true);
-      triggerHaptic();
+    setSubmissionError(null);
 
-      // Clear success overlay after 6 seconds
+    if (!formId) {
+      // Direct, safe, immediate fallback using standard prefilled mailto email triggering
+      // This is highly robust: if there's no custom Formspree key configured yet,
+      // it launches the user's mail client directly with all message fields populated to rasuen27@gmail.com!
       setTimeout(() => {
-        setFormSubmitted(false);
-        setFormData({ name: '', email: '', message: '' });
-      }, 6000);
-    }, 1800);
+        setLoading(false);
+        setFormSubmitted(true);
+        triggerHaptic();
+
+        const subject = encodeURIComponent(`Portfolio Message from ${formData.name}`);
+        const body = encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`);
+        const mailtoUrl = `mailto:rasuen27@gmail.com?subject=${subject}&body=${body}`;
+        
+        // Use standard window.location to trigger mail client securely without sandboxing blocks
+        window.location.href = mailtoUrl;
+
+        // Reset inputs after launching mail client fallback
+        setTimeout(() => {
+          setFormSubmitted(false);
+          setFormData({ name: '', email: '', message: '' });
+        }, 6000);
+      }, 1000);
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://formspree.io/f/${formId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+          _subject: `New portfolio inquiry from ${formData.name}`,
+          _to: "rasuen27@gmail.com"
+        })
+      });
+
+      setLoading(false);
+      if (response.ok) {
+        setFormSubmitted(true);
+        triggerHaptic();
+
+        // Clear success overlay after 6 seconds
+        setTimeout(() => {
+          setFormSubmitted(false);
+          setFormData({ name: '', email: '', message: '' });
+        }, 6000);
+      } else {
+        const data = await response.json();
+        setSubmissionError(data.error || 'Failed to submit form to Formspree. Ensure your Formspree ID is valid.');
+      }
+    } catch (err: any) {
+      setLoading(false);
+      setSubmissionError('A network error occurred. Please check your connection or contact directly via rasuen27@gmail.com.');
+      console.error('Submission error:', err);
+    }
   };
 
   if (isClosed) {
@@ -454,6 +516,12 @@ export default function Connect({ isDark, triggerHaptic }: ConnectProps) {
                 />
               </div>
 
+              {submissionError && (
+                <div className="text-red-500 text-xs font-mono border border-red-500/10 bg-red-500/5 px-4 py-3 rounded-2xl animate-shake select-text">
+                  ⚠️ {submissionError}
+                </div>
+              )}
+
               {/* Submit Capsule */}
               <button
                 type="submit"
@@ -489,10 +557,12 @@ export default function Connect({ isDark, triggerHaptic }: ConnectProps) {
                     ✓
                   </div>
                   <h4 className={`text-xl font-bold font-display mb-1 ${isDark ? 'text-white' : 'text-zinc-900'}`}>
-                    Transmission secure!
+                    {formId ? 'Inquiry Sent!' : 'Email Prepared!'}
                   </h4>
-                  <p className={`text-sm mb-5 font-mono px-4 leading-relaxed ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>
-                    Your project details have been securely logged inside the database queue. Rasendriya will evaluate this within 24 hours.
+                  <p className={`text-xs sm:text-sm mb-5 font-mono px-4 leading-relaxed ${isDark ? 'text-zinc-350' : 'text-zinc-650'}`}>
+                    {formId 
+                      ? 'Your inquiry parameters have been routed securely via background API to rasuen27@gmail.com. Expect a swift reply within 24 hours!'
+                      : 'We have launched your standard email program with all fields pre-filled for rasuen27@gmail.com. Just click send in your mail app to finalize transmission!'}
                   </p>
                   <button
                     onClick={() => { triggerHaptic(); setFormSubmitted(false); }}
