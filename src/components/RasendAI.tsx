@@ -150,7 +150,14 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
         body: JSON.stringify({ messages: messagesPayload }),
       });
 
-      const data = await res.json();
+      let data: any = {};
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        data = { error: text.slice(0, 150) || `HTTP error ${res.status} returned by server.` };
+      }
 
       if (res.ok) {
         setMessages((prev) => [
@@ -168,7 +175,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
           {
             id: Math.random().toString(36).substring(7),
             role: "assistant",
-            content: `⚠️ **Server connection note**:\n${data.error || "Unable to acquire completion right now. Make sure the API key is set in Settings."}`
+            content: `⚠️ **Server connection note**:\n${data.error || "Unable to acquire completion right now. Make sure the GEMINI_API_KEY is properly set in Settings."}`
           },
         ]);
         triggerHaptic("error");
@@ -179,7 +186,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
         {
           id: Math.random().toString(36).substring(7),
           role: "assistant",
-          content: "❌ Sorry, I encountered a communication problem. Please ensure your development server has completely restarted and is operational."
+          content: "❌ Sorry, I encountered a communication problem. Please ensure your GEMINI_API_KEY is saved in the AI Studio Settings panel and your server is operational."
         },
       ]);
       triggerHaptic("error");

@@ -1,30 +1,19 @@
-import express from "express";
-import path from "path";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
-import dotenv from "dotenv";
-import { personalInfo, skills, certifications, timelineItems, projects } from "./src/data";
-
-dotenv.config();
-
-const app = express();
-const PORT = 3000;
-
-app.use(express.json());
+import { skills, timelineItems, certifications, projects } from "../src/data";
 
 // Lazy initializer for GoogleGenAI SDK to prevent startup crashes when API key is missing
 let aiInstance: GoogleGenAI | null = null;
 function getAI() {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === "MY_GEMINI_API_KEY" || apiKey.trim() === "") {
-    throw new Error("Google Gemini API key is missing or not configured. Please add GEMINI_API_KEY to your Secrets Settings panel.");
+    throw new Error("Google Gemini API key is missing. Please add GEMINI_API_KEY to your Vercel Project Environment Variables.");
   }
   if (!aiInstance) {
     aiInstance = new GoogleGenAI({
       apiKey,
       httpOptions: {
         headers: {
-          'User-Agent': 'aistudio-build',
+          'User-Agent': 'aistudio-build-vercel',
         }
       }
     });
@@ -74,10 +63,15 @@ ${JSON.stringify(projects, null, 2)}
 7. Always stick to the factual information provided above. Do not hallucinate credentials, phone numbers, or external URLs.
 `;
 
-// Server API Routes
-app.post("/api/chat", async (req, res) => {
+export default async function handler(req: any, res: any) {
+  // Standalone serverless routing logic matching standard Vercel serverless specifications
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', ['POST']);
+    return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
+  }
+
   try {
-    const { messages } = req.body;
+    const { messages } = req.body || {};
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: "Messages array is required." });
     }
@@ -88,14 +82,13 @@ app.post("/api/chat", async (req, res) => {
       ai = getAI();
     } catch (apiKeyErr: any) {
       return res.status(400).json({
-        error: apiKeyErr.message || "Google Gemini API key is missing. Please add GEMINI_API_KEY in the Settings."
+        error: apiKeyErr.message || "Google Gemini API key is missing on Vercel environment variables."
       });
     }
 
     // Map roles from standard front-end 'user'/'assistant' to Gemini compatible 'user'/'model'
     const formattedContents = messages.map((msg: any) => {
       const role = msg.role === "assistant" ? "model" : "user";
-      // Ensure we extract simple string text
       const textVal = typeof msg.content === "string" ? msg.content : "";
       return {
         role,
@@ -114,38 +107,13 @@ app.post("/api/chat", async (req, res) => {
     });
 
     const replyText = completion.text || "I am currently processing your inquiry, please try again soon.";
-    return res.json({ reply: replyText });
+    return res.status(200).json({ reply: replyText });
 
   } catch (error: any) {
-    console.error("Gemini API server route error:", error);
+    console.error("Vercel Serverless Gemini API Error:", error);
     return res.status(500).json({
       error: "An error occurred while connecting to the AI services.",
       details: error.message || error
     });
   }
-});
-
-// Configure Vite middleware in development vs static file hosting in production
-const startServer = async () => {
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
-  }
-
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Portfolio Server operational on http://0.0.0.0:${PORT}`);
-  });
-};
-
-startServer().catch((err) => {
-  console.error("Failed to start fullstack portfolio server:", err);
-});
+}
