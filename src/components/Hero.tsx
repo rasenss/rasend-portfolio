@@ -225,7 +225,7 @@ export default function Hero({ isDark, triggerHaptic }: HeroProps) {
                   : '0 10px 30px -10px rgba(0,0,0,0.15)' 
               }}
               whileTap={{ scale: 0.98 }}
-              className={`group flex items-center gap-2 px-8 py-4 rounded-full font-bold transition-all duration-300 shadow-md cursor-pointer transform ${
+              className={`group flex items-center gap-2 px-8 py-4 rounded-full font-bold transition-[background-color,color] duration-300 shadow-md cursor-pointer transform ${
                 isDark 
                   ? 'bg-white text-gray-900 hover:bg-zinc-100 active:bg-zinc-200' 
                   : 'bg-zinc-900 text-white hover:bg-zinc-800 active:bg-black'
@@ -261,7 +261,7 @@ export default function Hero({ isDark, triggerHaptic }: HeroProps) {
                   }}
                   whileHover={{ scale: 1.15, y: -4 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`h-11 w-11 flex items-center justify-center rounded-2xl border transition-all duration-300 ${
+                  className={`h-11 w-11 flex items-center justify-center rounded-2xl border transition-[background-color,border-color,color] duration-300 ${
                     isDark 
                       ? 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-850 hover:border-zinc-700' 
                       : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:bg-zinc-200 hover:border-zinc-300'
