@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Download, Linkedin, MapPin, Phone, Mail, ChevronDown, ChevronUp, GraduationCap, Briefcase, Award, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
+import { Download, Linkedin, MapPin, Phone, Mail, ChevronDown, ChevronUp, GraduationCap, Briefcase, Award, CheckCircle2, Loader2, Sparkles, FileText, ExternalLink } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { personalInfo, timelineItems, certifications, skills } from '../data';
 import { WindowControls } from './WindowControls';
@@ -533,23 +533,18 @@ export default function Resume({ isDark, triggerHaptic }: ResumeProps) {
 
             {/* Action buttons (Download & Linkedin link) */}
             <div className="flex items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
-              <button
+              <a
                 id="resume-download-btn"
-                onClick={handleDownloadCV}
-                disabled={downloading}
-                className={`flex-1 md:flex-initial flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-300 cursor-pointer shadow-md shadow-blue-500/10 ${
-                  downloading 
-                    ? 'bg-blue-600/50 text-white cursor-wait' 
-                    : 'bg-blue-500 hover:bg-blue-600 text-white hover:-translate-y-0.5'
-                }`}
+                href="https://docs.google.com/document/d/1jFgRKWyeisAu92_FXd-f4d6Rj4rPX0C65yteQyZsAfA/edit?usp=drive_link"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => triggerHaptic('heavy')}
+                className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-300 cursor-pointer shadow-md shadow-blue-500/10 bg-blue-500 hover:bg-blue-600 text-white hover:-translate-y-0.5"
               >
-                {downloading ? (
-                  <Loader2 size={16} className="animate-spin" />
-                ) : (
-                  <Download size={16} />
-                )}
-                <span>{downloading ? 'Preparing CV...' : 'Download CV'}</span>
-              </button>
+                <FileText size={16} />
+                <span>See My Resume Here</span>
+                <ExternalLink size={12} className="opacity-70" />
+              </a>
 
               <a
                 href={personalInfo.socials.linkedin}
