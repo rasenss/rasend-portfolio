@@ -170,12 +170,14 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
         ]);
         triggerHaptic("success");
       } else {
+        const errorMsg = data.error || "Unable to acquire completion right now.";
+        const detailsMsg = data.details ? `\n\n**Details**: ${data.details}` : "";
         setMessages((prev) => [
           ...prev,
           {
             id: Math.random().toString(36).substring(7),
             role: "assistant",
-            content: `⚠️ **Server connection note**:\n${data.error || "Unable to acquire completion right now. Make sure the GEMINI_API_KEY is properly set in Settings."}`
+            content: `⚠️ **Server connection note**:\n${errorMsg}${detailsMsg}\n\n*Tip: If you recently added ` + "`GEMINI_API_KEY`" + ` in Vercel, please **redeploy** your project on Vercel so the new variables take effect!*`
           },
         ]);
         triggerHaptic("error");
@@ -411,7 +413,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyDown}
                   disabled={isLoading}
-                  className={`w-full rounded-2xl pr-12 pl-4 py-3.5 text-sm transition-all focus:outline-none focus:ring-1 ${
+                  className={`w-full rounded-2xl pr-12 pl-4 py-3.5 text-base md:text-sm transition-all focus:outline-none focus:ring-1 ${
                     isDark 
                       ? "bg-white/5 border-white/10 text-white focus:border-blue-500 focus:ring-blue-500/10 placeholder-zinc-500" 
                       : "bg-zinc-100/80 border-black/10 text-zinc-900 focus:border-blue-500 focus:ring-blue-500/5 placeholder-zinc-400"
