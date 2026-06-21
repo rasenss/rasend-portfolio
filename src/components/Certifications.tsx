@@ -235,49 +235,44 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
         </motion.div>
 
         {/* Certifications Dynamic List Mapping */}
-        <AnimatePresence mode="popLayout">
-          {filteredCertifications.length > 0 ? (
-            <div className="space-y-6">
-              <motion.div 
-                layout
-                transition={{ type: 'spring', stiffness: 500, damping: 45 }}
-                className="flex flex-col gap-6"
+        {filteredCertifications.length > 0 ? (
+          <div className="space-y-6">
+            <div className="flex flex-col gap-6">
+              {filteredCertifications.slice(0, visibleCount).map((cert, index) => (
+              <motion.div
+                key={`${selectedOrg}-${searchQuery}-${cert.id}`}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.28,
+                  delay: Math.min(index * 0.035, 0.18),
+                  ease: [0.215, 0.610, 0.355, 1.000]
+                }}
+                whileHover={{ y: -3 }}
+                className={`rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden transform-gpu will-change-[transform,opacity] ${
+                  isDark 
+                    ? 'glass-panel-dark hover:border-blue-500/20' 
+                    : 'glass-panel-light hover:border-blue-500/10'
+                }`}
               >
-                {filteredCertifications.slice(0, visibleCount).map((cert, index) => (
-                <motion.div
-                  key={cert.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-10px' }}
-                  transition={{ 
-                    opacity: { duration: 0.2 },
-                    y: { duration: 0.2 },
-                    layout: { type: 'spring', stiffness: 500, damping: 45 }
-                  }}
-                  layout
-                  className={`rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden ${
-                    isDark 
-                      ? 'glass-panel-dark hover:border-blue-500/20' 
-                      : 'glass-panel-light hover:border-blue-500/10'
-                  }`}
-                >
-                  {/* Left Column info details */}
-                  <div className="flex flex-col sm:flex-row items-start gap-5 sm:gap-6">
-                    <div className="relative group/thumb h-20 w-28 sm:h-24 sm:w-36 rounded-2xl overflow-hidden shrink-0 border border-black/10 dark:border-white/10 shadow-sm flex items-center justify-center bg-black/5 dark:bg-white/5 p-1.5">
-                      {cert.imageUrl ? (
-                        <img
-                          src={cert.imageUrl}
-                          alt={cert.title}
-                          referrerPolicy="no-referrer"
-                          className="max-w-full max-h-full w-auto h-auto object-contain group-hover/thumb:scale-110 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className={`w-full h-full flex items-center justify-center ${isDark ? 'bg-white/5 text-blue-400' : 'bg-black/5 text-blue-600'}`}>
-                          <ShieldCheck size={28} className="animate-pulse" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-black/10 group-hover/thumb:bg-black/0 transition-colors duration-300" />
-                    </div>
+                {/* Left Column info details */}
+                <div className="flex flex-col sm:flex-row items-start gap-5 sm:gap-6">
+                  <div className="relative group/thumb h-20 w-28 sm:h-24 sm:w-36 rounded-2xl overflow-hidden shrink-0 border border-black/10 dark:border-white/10 shadow-sm flex items-center justify-center bg-black/5 dark:bg-white/5 p-1.5">
+                    {cert.imageUrl ? (
+                      <img
+                        src={cert.imageUrl}
+                        alt={cert.title}
+                        referrerPolicy="no-referrer"
+                        loading="lazy"
+                        className="max-w-full max-h-full w-auto h-auto object-contain group-hover/thumb:scale-110 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className={`w-full h-full flex items-center justify-center ${isDark ? 'bg-white/5 text-blue-400' : 'bg-black/5 text-blue-600'}`}>
+                        <ShieldCheck size={28} className="animate-pulse" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/10 group-hover/thumb:bg-black/0 transition-colors duration-300" />
+                  </div>
                     <div>
                       <h3 className={`text-lg sm:text-xl font-bold font-display tracking-tight mb-1.5 ${
                         isDark ? 'text-white' : 'text-gray-950'
@@ -336,7 +331,7 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
 
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
 
             {filteredCertifications.length > visibleCount && (
               <div className="flex justify-center pt-4">
@@ -376,7 +371,6 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
               <p className="text-sm">Try searching other terminology or organizations.</p>
             </motion.div>
           )}
-        </AnimatePresence>
         </div>
         </motion.div>
       </motion.div>
@@ -391,7 +385,7 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={handleCloseCredential}
-                className="fixed inset-0 bg-black/70 backdrop-blur-md"
+                className="fixed inset-0 bg-black/40 backdrop-blur-md"
               />
 
               {/* Modal Box */}
@@ -402,8 +396,8 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
                 transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
                 className={`relative w-full max-w-2xl my-auto h-auto max-h-none sm:max-h-[85vh] flex flex-col rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-2xl z-10 border ${
                   isDark 
-                    ? 'bg-[#0a0b10] border-white/10 text-white shadow-black/90' 
-                    : 'bg-white border-gray-200 text-gray-950'
+                    ? 'glass-panel-dark border-white/10 text-white shadow-black/90' 
+                    : 'glass-panel-light border-black/5 text-gray-950'
                 }`}
               >
                 {/* Close Button top-right */}

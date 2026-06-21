@@ -243,47 +243,41 @@ export default function Portfolio({ isDark, triggerHaptic }: PortfolioProps) {
         </motion.div>
 
         {/* Grid mapping */}
-        <motion.div
-          layout
-          transition={{ type: 'spring', stiffness: 500, damping: 45 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          <AnimatePresence mode="popLayout">
-            {filteredProjects.map((p, pIdx) => {
-              const isLiked = likedProjects[p.id] || false;
-              return (
-                <motion.div
-                  key={p.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true, margin: '-20px' }}
-                  transition={{ 
-                    opacity: { duration: 0.2 },
-                    scale: { duration: 0.2 },
-                    layout: { type: 'spring', stiffness: 500, damping: 45 }
-                  }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  onClick={() => handleOpenProject(p)}
-                  className={`group rounded-3xl overflow-hidden cursor-pointer border flex flex-col justify-between ${
-                    isDark 
-                      ? 'glass-panel-dark border-white/5 hover:border-white/10' 
-                      : 'glass-panel-light border-black/5 hover:border-black/10'
-                  }`}
-                >
-                  
-                  {/* Decorative Mockup display frame representation */}
-                  <div className={`relative h-auto aspect-video w-full bg-gradient-to-tr ${p.imageColor} flex items-center justify-center overflow-hidden p-3`}>
-                    {p.imageUrl ? (
-                      <img
-                        src={p.imageUrl}
-                        alt={p.title}
-                        referrerPolicy="no-referrer"
-                        className="max-w-full max-h-full w-auto h-auto object-contain group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-black/10 mix-blend-overlay group-hover:scale-105 transition-all duration-500" />
-                    )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProjects.map((p, pIdx) => {
+            const isLiked = likedProjects[p.id] || false;
+            return (
+              <motion.div
+                key={`${activeCategory}-${p.id}`}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.28,
+                  delay: Math.min(pIdx * 0.03, 0.18),
+                  ease: [0.215, 0.610, 0.355, 1.000]
+                }}
+                whileHover={{ scale: 1.015 }}
+                onClick={() => handleOpenProject(p)}
+                className={`group rounded-3xl overflow-hidden cursor-pointer border flex flex-col justify-between transform-gpu will-change-[transform,opacity] ${
+                  isDark 
+                    ? 'glass-panel-dark border-white/5 hover:border-white/10' 
+                    : 'glass-panel-light border-black/5 hover:border-black/10'
+                }`}
+              >
+                
+                {/* Decorative Mockup display frame representation */}
+                <div className={`relative h-auto aspect-video w-full bg-gradient-to-tr ${p.imageColor} flex items-center justify-center overflow-hidden p-3`}>
+                  {p.imageUrl ? (
+                    <img
+                      src={p.imageUrl}
+                      alt={p.title}
+                      referrerPolicy="no-referrer"
+                      loading="lazy"
+                      className="max-w-full max-h-full w-auto h-auto object-contain group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-black/10 mix-blend-overlay group-hover:scale-105 transition-all duration-500" />
+                  )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
                     
                     {/* SVG graphic representations of layouts overlayed when no image */}
@@ -378,8 +372,7 @@ export default function Portfolio({ isDark, triggerHaptic }: PortfolioProps) {
                 </motion.div>
               );
             })}
-          </AnimatePresence>
-        </motion.div>
+        </div>
         </div>
         </motion.div>
       </motion.div>
@@ -393,7 +386,7 @@ export default function Portfolio({ isDark, triggerHaptic }: PortfolioProps) {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={handleCloseProject}
-                className="fixed inset-0 bg-black/75 backdrop-blur-sm"
+                className="fixed inset-0 bg-black/40 backdrop-blur-md"
               />
 
               <motion.div
@@ -403,8 +396,8 @@ export default function Portfolio({ isDark, triggerHaptic }: PortfolioProps) {
                 transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
                 className={`relative w-full max-w-4xl my-auto h-auto md:h-[80vh] rounded-[24px] md:rounded-[32px] overflow-hidden flex flex-col md:flex-row shadow-2xl border ${
                   isDark 
-                    ? 'bg-gray-950 border-white/10 text-white' 
-                    : 'bg-white border-gray-200 text-gray-950'
+                    ? 'glass-panel-dark border-white/10 text-white' 
+                    : 'glass-panel-light border-black/5 text-gray-950'
                 }`}
               >
                 {/* Left high-fidelity image visualization frame */}

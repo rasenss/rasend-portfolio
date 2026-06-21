@@ -264,8 +264,8 @@ export default function Navbar({ isDark, onToggleTheme, triggerHaptic, isPlaying
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className={`fixed top-[74px] left-4 right-4 z-40 p-5 rounded-3xl lg:hidden max-h-[80vh] overflow-y-auto ${
               isDark 
-                ? 'bg-gray-950/95 border border-white/10 shadow-2xl backdrop-blur-lg text-white' 
-                : 'bg-white/95 border border-gray-200 shadow-2xl backdrop-blur-lg text-gray-900'
+                ? 'glass-panel-dark text-white' 
+                : 'glass-panel-light text-gray-900 border-black/5'
             }`}
           >
             <div className="flex flex-col gap-2">

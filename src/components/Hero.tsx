@@ -76,8 +76,15 @@ function DecryptText({ text, startDelay = 0.3, trigger = 0 }: { text: string; st
   }, [text, startDelay, trigger]);
 
   return (
-    <span className="font-mono tracking-wide selection:bg-blue-500/20">
-      {displayText || text.replace(/[^ ]/g, " ")}
+    <span className="font-mono tracking-wide selection:bg-blue-500/20 relative inline-block">
+      {/* Invisible placeholder containing the exact text to reserve correct layout dimensions */}
+      <span className="opacity-0 select-none pointer-events-none block" aria-hidden="true">
+        {text}
+      </span>
+      {/* Absolute overlay container containing the scrambling or decrypted text */}
+      <span className="absolute inset-x-0 top-0 text-center">
+        {displayText || text.split("").map(() => glyphs[Math.floor(Math.random() * glyphs.length)]).join("")}
+      </span>
     </span>
   );
 }
@@ -181,7 +188,7 @@ export default function Hero({ isDark, triggerHaptic }: HeroProps) {
           </motion.h1>
 
           {/* Subtitle / Focus Roles - Animated elegant responsive text block with layout switching */}
-          <div className="mb-8 mt-6 overflow-hidden flex justify-center h-8 items-center">
+          <div className="mb-8 mt-6 flex justify-center min-h-8 md:h-8 items-center py-1 md:py-0">
             <motion.p
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}

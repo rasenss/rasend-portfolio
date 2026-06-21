@@ -180,8 +180,8 @@ html, body {
 /* Glassmorphism panel styling helper classes - Liquid Glass Edition */
 .glass-panel-light {
   background: rgba(255, 255, 255, 0.68) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
   border: 1px solid rgba(255, 255, 255, 0.45) !important;
   
   box-shadow: 
@@ -192,14 +192,28 @@ html, body {
 
 .glass-panel-dark {
   background: rgba(10, 11, 16, 0.76) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   
   box-shadow: 
     0 24px 48px -12px rgba(0, 0, 0, 0.6), 
     inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
     inset 0 -1px 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Optimize backdrop-filters on mobile devices to prevent any sluggish frame drops */
+@media (max-width: 640px) {
+  .glass-panel-light {
+    -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
+    backdrop-filter: blur(10px) saturate(150%) !important;
+    background: rgba(255, 255, 255, 0.78) !important;
+  }
+  .glass-panel-dark {
+    -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
+    backdrop-filter: blur(10px) saturate(150%) !important;
+    background: rgba(10, 11, 16, 0.85) !important;
+  }
 }
 
 /* Glass interactive items */
