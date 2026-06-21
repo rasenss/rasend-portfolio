@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Filter, ShieldCheck, Award, ExternalLink, Calendar, Hash, X, Globe, Library, Folder, FileText, Image as ImageIcon, FileJson, Download, Copy, Check } from 'lucide-react';
 import { certifications, personalInfo } from '../data';
@@ -18,6 +18,20 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
   const [isClosed, setIsClosed] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [visibleCount, setVisibleCount] = useState(4);
+
+  useEffect(() => {
+    if (selectedCert) {
+      document.body.style.overflow = 'hidden';
+      document.body.classList.add('modal-open-active');
+    } else {
+      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open-active');
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open-active');
+    };
+  }, [selectedCert]);
 
   // Derive unique list of organizations for filter options
   const organizations = ['All', ...Array.from(new Set(certifications.map((c) => c.organization)))];
@@ -370,14 +384,14 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
         {/* Detailed Credential Popup Drawer/Modal */}
         <AnimatePresence>
           {selectedCert && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+            <div className="fixed inset-0 z-[9999] flex items-start sm:items-center justify-center p-4 sm:p-6 overflow-y-auto">
               {/* Overlay Backdrop */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={handleCloseCredential}
-                className="absolute inset-0 bg-black/70 backdrop-blur-md"
+                className="fixed inset-0 bg-black/70 backdrop-blur-md"
               />
 
               {/* Modal Box */}
@@ -386,7 +400,7 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                className={`relative w-full max-w-2xl max-h-[92vh] sm:max-h-[85vh] flex flex-col rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-2xl z-10 border ${
+                className={`relative w-full max-w-2xl my-auto h-auto max-h-none sm:max-h-[85vh] flex flex-col rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-2xl z-10 border ${
                   isDark 
                     ? 'bg-[#0a0b10] border-white/10 text-white shadow-black/90' 
                     : 'bg-white border-gray-200 text-gray-950'
@@ -405,7 +419,7 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
                 </button>
 
                 {/* Scrollable Container Body */}
-                <div className="flex-1 overflow-y-auto p-5 sm:p-9 pt-12 sm:pt-14 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-5 sm:p-9 pt-16 sm:pt-20 custom-scrollbar">
                   
                   {/* Badge Indicator tag */}
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono uppercase bg-blue-500/10 text-blue-500 border border-blue-500/20 mb-5">
@@ -440,18 +454,18 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
                   <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 rounded-2xl mb-6 text-sm font-mono ${
                     isDark ? 'bg-white/[0.02] border border-white/5' : 'bg-black/[0.01] border border-black/5'
                   }`}>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <Calendar size={16} className="text-gray-400" />
                       <span className={isDark ? 'text-gray-400' : 'text-gray-500'}>Issued Year:</span>
                       <span className="font-semibold">{selectedCert.year}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Hash size={16} className="text-gray-400" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Hash size={16} className="text-gray-400 text-shrink-0" />
                       <span className={isDark ? 'text-gray-400' : 'text-gray-500'}>Cred ID:</span>
-                      <span className="font-semibold">{selectedCert.credentialId || 'N/A'}</span>
+                      <span className="font-semibold break-all">{selectedCert.credentialId || 'N/A'}</span>
                     </div>
                     {selectedCert.credentialUrl && (
-                      <div className="flex items-center gap-2 sm:col-span-2">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:col-span-2">
                         <Globe size={16} className="text-gray-400 animate-pulse" />
                         <span className={isDark ? 'text-gray-400' : 'text-gray-500'}>Registry Verification Link:</span>
                         <a
@@ -459,7 +473,7 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={triggerHaptic}
-                          className="text-blue-500 hover:underline flex items-center gap-1 font-semibold hover:text-blue-600"
+                          className="text-blue-500 hover:underline flex items-center gap-1 font-semibold hover:text-blue-600 break-all"
                         >
                           <span>Verify Credentials portal</span>
                           <ExternalLink size={11} />

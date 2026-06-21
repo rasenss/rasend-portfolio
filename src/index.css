@@ -229,3 +229,11 @@ html, body {
 .font-mono, .font-mono *, code, pre, .mono-text {
   font-family: "JetBrains Mono", "Fira Code", monospace !important;
 }
+
+/* If a modal is active, smoothly hide the navbar to prevent any overlapping issues */
+body.modal-open-active #navbar-header {
+  pointer-events: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}

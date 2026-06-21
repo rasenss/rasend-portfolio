@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ExternalLink, Github, Layers, ArrowLeft, ArrowUpRight, Search, Heart, Smartphone, Monitor, Code, Palette, Printer, HeartCrack, Sparkles } from 'lucide-react';
 import { projects } from '../data';
@@ -18,6 +18,20 @@ export default function Portfolio({ isDark, triggerHaptic }: PortfolioProps) {
   const [isMinimized, setIsMinimized] = useState(false);
   const [floatingHearts, setFloatingHearts] = useState<{ id: number; x: number; y: number; size: number; rotation: number; text: string }[]>([]);
   const [showAppreciateToast, setShowAppreciateToast] = useState(false);
+
+  useEffect(() => {
+    if (selectedProject) {
+      document.body.style.overflow = 'hidden';
+      document.body.classList.add('modal-open-active');
+    } else {
+      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open-active');
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open-active');
+    };
+  }, [selectedProject]);
 
   // Compile categories dynamically
   const categories = ['All', 'Linkedin Post Design', 'Logo', 'Mobile-Design', 'Poster-Design', 'Simple-Design'];
@@ -373,13 +387,13 @@ export default function Portfolio({ isDark, triggerHaptic }: PortfolioProps) {
         {/* Immersive interactive live project simulator overlay */}
         <AnimatePresence>
           {selectedProject && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-[9999] flex items-start md:items-center justify-center p-4 sm:p-6 md:p-10 overflow-y-auto">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={handleCloseProject}
-                className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+                className="fixed inset-0 bg-black/75 backdrop-blur-sm"
               />
 
               <motion.div
@@ -387,19 +401,19 @@ export default function Portfolio({ isDark, triggerHaptic }: PortfolioProps) {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                className={`relative w-full max-w-4xl h-[85vh] rounded-[32px] overflow-hidden flex flex-col md:flex-row shadow-2xl border ${
+                className={`relative w-full max-w-4xl my-auto h-auto md:h-[80vh] rounded-[24px] md:rounded-[32px] overflow-hidden flex flex-col md:flex-row shadow-2xl border ${
                   isDark 
                     ? 'bg-gray-950 border-white/10 text-white' 
                     : 'bg-white border-gray-200 text-gray-950'
                 }`}
               >
                 {/* Left high-fidelity image visualization frame */}
-                <div className={`md:w-3/5 h-auto min-h-[220px] max-h-[380px] md:max-h-none md:h-full relative bg-gradient-to-tr ${selectedProject.imageColor} flex items-center justify-center p-6 overflow-hidden border-b md:border-b-0 md:border-r ${
+                <div className={`w-full md:w-3/5 h-44 sm:h-56 md:h-full flex-shrink-0 relative bg-gradient-to-tr ${selectedProject.imageColor} flex items-center justify-center p-4 sm:p-6 overflow-hidden border-b md:border-b-0 md:border-r ${
                   isDark ? 'border-white/5' : 'border-black/5'
                 }`}>
                   <div className="absolute inset-0 bg-black/10 mix-blend-overlay" />
                   
-                  <div className="relative w-full h-full min-h-[180px] rounded-2xl overflow-hidden border border-white/15 dark:border-white/10 shadow-2xl bg-black/40 flex items-center justify-center p-4">
+                  <div className="relative w-full h-full min-h-[120px] rounded-2xl overflow-hidden border border-white/15 dark:border-white/10 shadow-2xl bg-black/40 flex items-center justify-center p-4">
                     {selectedProject.imageUrl ? (
                       <img
                         src={selectedProject.imageUrl}
@@ -417,7 +431,7 @@ export default function Portfolio({ isDark, triggerHaptic }: PortfolioProps) {
                 </div>
 
                 {/* Right descriptions and metadata panel */}
-                <div className="md:w-2/5 h-[55%] md:h-full overflow-y-auto p-6 sm:p-8 flex flex-col justify-between">
+                <div className="w-full md:w-2/5 flex-1 md:h-full overflow-y-auto p-5 sm:p-8 flex flex-col justify-between">
                   <div>
                     {/* Header bar controls */}
                     <div className="flex items-center justify-between mb-6">
