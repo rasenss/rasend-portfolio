@@ -296,16 +296,18 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
 
                   {/* Right Column Action Blocks matching layout image */}
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto justify-stretch sm:justify-end mt-4 sm:mt-0 shrink-0">
-                    <a
-                      href={cert.credentialUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={triggerHaptic}
-                      className={`w-full sm:w-auto text-center inline-flex items-center justify-center gap-1.5 px-4.5 py-3 rounded-2xl text-[11px] sm:text-xs font-bold uppercase tracking-wider bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-md shadow-blue-500/10 active:scale-[0.98] duration-300 shrink-0`}
-                    >
-                      <span>Verification</span>
-                      <ExternalLink size={12} className="shrink-0" />
-                    </a>
+                    {cert.credentialUrl && (
+                      <a
+                        href={cert.credentialUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={triggerHaptic}
+                        className={`w-full sm:w-auto text-center inline-flex items-center justify-center gap-1.5 px-4.5 py-3 rounded-2xl text-[11px] sm:text-xs font-bold uppercase tracking-wider bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-md shadow-blue-500/10 active:scale-[0.98] duration-300 shrink-0`}
+                      >
+                        <span>Verification</span>
+                        <ExternalLink size={12} className="shrink-0" />
+                      </a>
+                    )}
                     <button
                       onClick={() => handleShowCredential(cert)}
                       className={`w-full sm:w-auto text-center inline-flex items-center justify-center gap-1.5 px-4.5 py-3 rounded-2xl text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all border duration-300 shrink-0 ${
@@ -448,20 +450,22 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
                       <span className={isDark ? 'text-gray-400' : 'text-gray-500'}>Cred ID:</span>
                       <span className="font-semibold">{selectedCert.credentialId || 'N/A'}</span>
                     </div>
-                    <div className="flex items-center gap-2 sm:col-span-2">
-                      <Globe size={16} className="text-gray-400 animate-pulse" />
-                      <span className={isDark ? 'text-gray-400' : 'text-gray-500'}>Registry Verification Link:</span>
-                      <a
-                        href={selectedCert.credentialUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={triggerHaptic}
-                        className="text-blue-500 hover:underline flex items-center gap-1 font-semibold hover:text-blue-600"
-                      >
-                        <span>Verify Credentials portal</span>
-                        <ExternalLink size={11} />
-                      </a>
-                    </div>
+                    {selectedCert.credentialUrl && (
+                      <div className="flex items-center gap-2 sm:col-span-2">
+                        <Globe size={16} className="text-gray-400 animate-pulse" />
+                        <span className={isDark ? 'text-gray-400' : 'text-gray-500'}>Registry Verification Link:</span>
+                        <a
+                          href={selectedCert.credentialUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={triggerHaptic}
+                          className="text-blue-500 hover:underline flex items-center gap-1 font-semibold hover:text-blue-600"
+                        >
+                          <span>Verify Credentials portal</span>
+                          <ExternalLink size={11} />
+                        </a>
+                      </div>
+                    )}
                   </div>
 
                   {/* Skills Tag block */}
