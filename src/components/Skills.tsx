@@ -248,10 +248,10 @@ export default function Skills({ isDark, triggerHaptic }: SkillsProps) {
 
         {/* Dynamic Dual Panel Deck with Mainframe Frame wrapping */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
           className={`rounded-3xl overflow-hidden shadow-xl transition-all duration-500 ${
             isDark 
               ? 'glass-panel-dark shadow-black/80' 

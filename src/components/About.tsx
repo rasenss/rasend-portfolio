@@ -98,20 +98,20 @@ export default function About({ isDark, triggerHaptic }: AboutProps) {
         {/* Section Title */}
         <div className="mb-16 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.5 }}
+            viewport={{ once: true, margin: '-20px' }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
             className="inline-flex items-center gap-2 text-blue-500 font-mono text-sm font-semibold tracking-wider uppercase mb-3"
           >
             <User size={16} />
             <span>Discover Me</span>
           </motion.div>
           <motion.h2
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            viewport={{ once: true, margin: '-20px' }}
+            transition={{ duration: 0.35, delay: 0.05, ease: 'easeOut' }}
             className={`text-3xl sm:text-4xl md:text-5xl font-bold font-display tracking-tight ${
               isDark ? 'text-white' : 'text-gray-950'
             }`}
@@ -122,10 +122,10 @@ export default function About({ isDark, triggerHaptic }: AboutProps) {
 
         {/* Outer Section Card wrapped inside a macOS style window console */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.1 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={{ duration: 0.4, delay: 0.05, ease: 'easeOut' }}
           className={`rounded-3xl overflow-hidden shadow-2xl transition-all duration-350 ${
             isDark 
               ? 'glass-panel-dark shadow-black/80' 

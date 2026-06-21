@@ -48,7 +48,7 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen relative font-sans transition-all duration-500 overflow-x-hidden ${isDark ? 'dark bg-[#050505] text-white' : 'bg-neutral-50 text-gray-900'}`}>
+    <div className={`min-h-screen relative font-sans transition-colors duration-500 overflow-x-hidden ${isDark ? 'dark bg-[#050505] text-white' : 'bg-neutral-50 text-gray-900'}`}>
       
       {/* Immersive Atmospheric Backdrop Glowing meshes */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -103,7 +103,7 @@ export default function App() {
         </main>
 
         {/* Roman Empire Cinematic Animated Footer */}
-        <footer className={`transition-all duration-500 border-t py-12 px-6 sm:px-12 text-center relative z-10 overflow-hidden ${
+        <footer className={`transition-colors duration-500 border-t py-12 px-6 sm:px-12 text-center relative z-10 overflow-hidden ${
           isDark 
             ? 'bg-black border-blue-500/10' 
             : 'bg-white border-blue-500/15'

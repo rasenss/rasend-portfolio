@@ -118,20 +118,20 @@ export default function Portfolio({ isDark, triggerHaptic }: PortfolioProps) {
         {/* Section Header */}
         <div className="mb-14 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.5 }}
+            viewport={{ once: true, margin: '-20px' }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
             className="inline-flex items-center gap-2 text-blue-500 font-mono text-sm font-semibold tracking-wider uppercase mb-3"
           >
             <Layers size={16} />
             <span>Featured Projects</span>
           </motion.div>
           <motion.h2
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            viewport={{ once: true, margin: '-20px' }}
+            transition={{ duration: 0.35, delay: 0.05, ease: 'easeOut' }}
             className={`text-3xl sm:text-4xl md:text-5xl font-bold font-display tracking-tight ${
               isDark ? 'text-white' : 'text-gray-950'
             }`}
@@ -143,12 +143,12 @@ export default function Portfolio({ isDark, triggerHaptic }: PortfolioProps) {
           </span>
         </div>
 
-        {/* macOS Style Window Console Frame around Portfolio contents */}
+        {/* macOS Style Window Frame around Portfolio contents */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={{ duration: 0.4, delay: 0.05, ease: 'easeOut' }}
           className={`rounded-3xl overflow-hidden shadow-2xl transition-all duration-300 mb-6 ${
             isDark 
               ? 'glass-panel-dark shadow-black/80' 
@@ -231,6 +231,7 @@ export default function Portfolio({ isDark, triggerHaptic }: PortfolioProps) {
         {/* Grid mapping */}
         <motion.div
           layout
+          transition={{ type: 'spring', stiffness: 500, damping: 45 }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           <AnimatePresence mode="popLayout">
@@ -240,10 +241,14 @@ export default function Portfolio({ isDark, triggerHaptic }: PortfolioProps) {
                 <motion.div
                   key={p.id}
                   layout
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.96 }}
                   whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: pIdx * 0.05 }}
+                  viewport={{ once: true, margin: '-20px' }}
+                  transition={{ 
+                    opacity: { duration: 0.2 },
+                    scale: { duration: 0.2 },
+                    layout: { type: 'spring', stiffness: 500, damping: 45 }
+                  }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   onClick={() => handleOpenProject(p)}
                   className={`group rounded-3xl overflow-hidden cursor-pointer border flex flex-col justify-between ${
@@ -378,10 +383,10 @@ export default function Portfolio({ isDark, triggerHaptic }: PortfolioProps) {
               />
 
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 30 }}
-                transition={{ type: 'spring', damping: 25 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
                 className={`relative w-full max-w-4xl h-[85vh] rounded-[32px] overflow-hidden flex flex-col md:flex-row shadow-2xl border ${
                   isDark 
                     ? 'bg-gray-950 border-white/10 text-white' 

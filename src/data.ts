@@ -475,6 +475,28 @@ export const projects: Project[] = [
     demoUrl: "#",
     imageColor: "from-zinc-800 to-zinc-950",
     imageUrl: "/Portfolio/Logo/BnW-Logo.png"
+  },
+  {
+    id: "proj_bnw_logo_2",
+    title: "BnW Minimalist Logo II",
+    category: "Logo",
+    subcategory: "Logo Design Design",
+    description: "Alternative typographic concept and visual geometry guidelines for the black and white corporate identity project.",
+    tags: ["Monochrome", "Branding", "Alternative Logo"],
+    demoUrl: "#",
+    imageColor: "from-zinc-700 to-slate-900",
+    imageUrl: "/Portfolio/Logo/BnW-2.png"
+  },
+  {
+    id: "proj_emblem_logo",
+    title: "Creative Emblem Logo",
+    category: "Logo",
+    subcategory: "Branding Design",
+    description: "A secondary creative emblem and branded identity concept exploring custom symbology, clean margins, and eye-friendly layouts.",
+    tags: ["Logo Design", "Emblem", "Creative Brand"],
+    demoUrl: "#",
+    imageColor: "from-blue-600 to-slate-800",
+    imageUrl: "/Portfolio/Logo/logo2.jpg"
   }
 ];
 

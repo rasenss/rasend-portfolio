@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sun, Moon, Menu, X, User, LayoutGrid, Award, Briefcase, FileText, Send } from 'lucide-react';
+import { Sun, Moon, Menu, X, User, LayoutGrid, Award, Briefcase, FileText, Send, Volume2, VolumeX } from 'lucide-react';
 
 interface NavbarProps {
   isDark: boolean;
@@ -14,8 +14,75 @@ export default function Navbar({ isDark, onToggleTheme, triggerHaptic }: NavbarP
   const [activeSection, setActiveSection] = useState('hero');
   const [entryComplete, setEntryComplete] = useState(false);
   
+  const [isPlaying, setIsPlaying] = useState(true);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const isNavigating = useRef(false);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Initialize and handle backsound autoplay & user interaction hooks for seamless cross-browser playback
+  useEffect(() => {
+    const audio = new Audio('/Backsound-Portfolio-Music.mp3');
+    audio.loop = true;
+    audio.volume = 0.35; // optimal cozy ambient volume
+    audioRef.current = audio;
+
+    if (isPlaying) {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.log("Autoplay blocked by browser policy. Music will play automatically upon first interaction.", error);
+        });
+      }
+    }
+
+    // Trigger audio block bypass on any screen interaction
+    const startAudioOnInteraction = () => {
+      if (isPlaying && audioRef.current && audioRef.current.paused) {
+        audioRef.current.play()
+          .then(() => {
+            cleanupListeners();
+          })
+          .catch((err) => {
+            console.log("Failed to start audio on interaction:", err);
+          });
+      }
+    };
+
+    const cleanupListeners = () => {
+      window.removeEventListener('click', startAudioOnInteraction, { capture: true });
+      window.removeEventListener('mousedown', startAudioOnInteraction, { capture: true });
+      window.removeEventListener('keydown', startAudioOnInteraction, { capture: true });
+      window.removeEventListener('touchstart', startAudioOnInteraction, { capture: true });
+    };
+
+    window.addEventListener('click', startAudioOnInteraction, { capture: true });
+    window.addEventListener('mousedown', startAudioOnInteraction, { capture: true });
+    window.addEventListener('keydown', startAudioOnInteraction, { capture: true });
+    window.addEventListener('touchstart', startAudioOnInteraction, { capture: true });
+
+    return () => {
+      cleanupListeners();
+      audio.pause();
+    };
+  }, []);
+
+  // Sync state transitions securely with HTML audio instance
+  useEffect(() => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.play().catch(err => {
+        console.log("Play gesture block: ", err);
+      });
+    } else {
+      audioRef.current.pause();
+    }
+  }, [isPlaying]);
+
+  const handleToggleMusic = () => {
+    triggerHaptic();
+    setIsPlaying(!isPlaying);
+  };
 
   // Dynamic tracking of scroll positioning with IntersectionObserver and passive scroll listener
   useEffect(() => {
@@ -111,7 +178,7 @@ export default function Navbar({ isDark, onToggleTheme, triggerHaptic }: NavbarP
         animate={{ y: 0, opacity: 1 }}
         onAnimationComplete={() => setEntryComplete(true)}
         style={entryComplete ? { transform: 'none' } : undefined}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
         className={`fixed top-0 left-0 right-0 z-50 transition-[padding] duration-300 ${
           scrolled 
             ? 'py-3' 
@@ -170,8 +237,40 @@ export default function Navbar({ isDark, onToggleTheme, triggerHaptic }: NavbarP
               })}
             </nav>
 
-            {/* Right side widgets: Theme toggle and mobile menu trigger */}
+            {/* Right side widgets: Theme toggle, Music play, and mobile menu trigger */}
             <div className="flex items-center gap-3">
+              {/* Music Ambient Backsound Toggle Switch */}
+              <button
+                id="music-toggle-btn"
+                onClick={handleToggleMusic}
+                className={`relative h-10 w-10 flex items-center justify-center rounded-full transition-all duration-300 ${
+                  isDark 
+                    ? 'bg-white/10 hover:bg-white/15 text-blue-400 border border-white/5' 
+                    : 'bg-black/5 hover:bg-black/10 text-blue-600 border border-black/5'
+                }`}
+                title={isPlaying ? "Mute backsound music" : "Enable backsound music"}
+              >
+                <motion.div
+                  initial={false}
+                  animate={{ scale: isPlaying ? [1, 1.12, 1] : 1 }}
+                  transition={isPlaying ? { repeat: Infinity, duration: 1.8, ease: "easeInOut" } : undefined}
+                  whileTap={{ scale: 0.85 }}
+                >
+                  {isPlaying ? (
+                    <div className="relative">
+                      <Volume2 size={18} />
+                      {/* Micro pulsating beacon indicator denoting active soundtrack playing */}
+                      <span className="absolute -top-1 -right-1.5 flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                      </span>
+                    </div>
+                  ) : (
+                    <VolumeX size={18} className={isDark ? "text-gray-500" : "text-gray-400"} />
+                  )}
+                </motion.div>
+              </button>
+
               {/* Theme Toggle Switch */}
               <button
                 id="theme-toggle-btn"

@@ -35,7 +35,7 @@ function DecryptText({ text, startDelay = 0.3, trigger = 0 }: { text: string; st
 
     const delayTimeout = setTimeout(() => {
       let frame = 0;
-      const durationFrames = 30; // Slightly faster for interactive response
+      const durationFrames = 10; // Rapid cybernetic decryption style
 
       const tick = () => {
         if (!isMounted) return;
@@ -147,9 +147,9 @@ export default function Hero({ isDark, triggerHaptic }: HeroProps) {
 
       <div className="w-full max-w-4xl mx-auto z-10">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className={`relative rounded-[24px] sm:rounded-[40px] px-4 sm:px-12 py-12 sm:py-16 text-center ${
             isDark ? 'glass-panel-dark' : 'glass-panel-light'
           }`}
@@ -169,10 +169,10 @@ export default function Hero({ isDark, triggerHaptic }: HeroProps) {
             title="Click or tap to scramble / re-decrypt name"
           >
             <div className="flex flex-wrap justify-center gap-x-[0.3em] gap-y-1">
-              <DecryptText text="Rasendriya" startDelay={0.25} trigger={nameTrigger} />
-              <DecryptText text="Khansa" startDelay={0.55} trigger={nameTrigger} />
+              <DecryptText text="Rasendriya" startDelay={0.02} trigger={nameTrigger} />
+              <DecryptText text="Khansa" startDelay={0.08} trigger={nameTrigger} />
             </div>
-            <DecryptText text="Jolankarfyan" startDelay={0.85} trigger={nameTrigger} />
+            <DecryptText text="Jolankarfyan" startDelay={0.16} trigger={nameTrigger} />
             
             {/* Subtle interactive action floating label */}
             <span className="text-[10px] font-mono tracking-[0.2em] uppercase font-semibold text-blue-500/0 group-hover/name:text-blue-500/60 dark:group-hover/name:text-blue-400/60 transition-all duration-300 select-none block mt-2 pointer-events-none">
@@ -210,9 +210,9 @@ export default function Hero({ isDark, triggerHaptic }: HeroProps) {
 
           {/* Start a Project Action Call button */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.4, duration: 0.7 }}
+            transition={{ delay: 0.3, duration: 0.35, ease: 'easeOut' }}
             className="flex justify-center mb-10"
           >
             <motion.button
@@ -240,7 +240,7 @@ export default function Hero({ isDark, triggerHaptic }: HeroProps) {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.7, duration: 0.8 }}
+            transition={{ delay: 0.4, duration: 0.35 }}
             className="flex items-center justify-center gap-4 sm:gap-6 flex-wrap"
           >
             {socialList.map((social, index) => {
@@ -252,11 +252,11 @@ export default function Hero({ isDark, triggerHaptic }: HeroProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={triggerHaptic}
-                  initial={{ opacity: 0, scale: 0.8, y: 15 }}
+                  initial={{ opacity: 0, scale: 0.85, y: 10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   transition={{ 
-                    delay: 1.8 + index * 0.08, 
-                    duration: 0.6, 
+                    delay: 0.42 + index * 0.02, 
+                    duration: 0.3, 
                     ease: [0.16, 1, 0.3, 1] 
                   }}
                   whileHover={{ scale: 1.15, y: -4 }}

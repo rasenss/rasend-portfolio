@@ -426,20 +426,20 @@ export default function Resume({ isDark, triggerHaptic }: ResumeProps) {
         {/* Section Header */}
         <div className="mb-14 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.5 }}
+            viewport={{ once: true, margin: '-20px' }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
             className="inline-flex items-center gap-2 text-blue-500 font-mono text-sm font-semibold tracking-wider uppercase mb-3"
           >
             <Briefcase size={16} />
             <span>Experience & Education</span>
           </motion.div>
           <motion.h2
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            viewport={{ once: true, margin: '-20px' }}
+            transition={{ duration: 0.35, delay: 0.05, ease: 'easeOut' }}
             className={`text-3xl sm:text-4xl md:text-5xl font-bold font-display tracking-tight ${
               isDark ? 'text-white' : 'text-gray-950'
             }`}
@@ -451,12 +451,12 @@ export default function Resume({ isDark, triggerHaptic }: ResumeProps) {
           </span>
         </div>
 
-        {/* macOS Style Window Console Frame around Resume contents */}
+        {/* macOS Style Window Frame around Resume contents */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={{ duration: 0.4, delay: 0.05, ease: 'easeOut' }}
           className={`rounded-3xl overflow-hidden shadow-2xl transition-all duration-300 mb-6 ${
             isDark 
               ? 'glass-panel-dark shadow-black/80' 
@@ -637,10 +637,14 @@ export default function Resume({ isDark, triggerHaptic }: ResumeProps) {
               return (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, x: -30 }}
+                  initial={{ opacity: 0, x: -15 }}
                   whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.05 }}
+                  viewport={{ once: true, margin: '-20px' }}
+                  transition={{ 
+                    opacity: { duration: 0.2 },
+                    x: { duration: 0.2 },
+                    layout: { type: 'spring', stiffness: 500, damping: 45 }
+                  }}
                   exit={{ opacity: 0, x: 30 }}
                   layout
                   className="relative group"
@@ -721,7 +725,7 @@ export default function Resume({ isDark, triggerHaptic }: ResumeProps) {
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.3 }}
+                          transition={{ duration: 0.22, ease: 'easeOut' }}
                           className="overflow-hidden border-t border-white/[0.05] dark:border-black/[0.05] mt-4 pt-4"
                         >
                           <span className={`text-[10px] font-mono block uppercase mb-2 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>

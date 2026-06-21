@@ -88,20 +88,20 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
         {/* Section Title */}
         <div className="mb-12 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.5 }}
+            viewport={{ once: true, margin: '-20px' }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
             className="inline-flex items-center gap-2 text-blue-500 font-mono text-sm font-semibold tracking-wider uppercase mb-3"
           >
             <Award size={16} />
             <span>Achievements & Certifications</span>
           </motion.div>
           <motion.h2
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            viewport={{ once: true, margin: '-20px' }}
+            transition={{ duration: 0.35, delay: 0.05, ease: 'easeOut' }}
             className={`text-3xl sm:text-4xl md:text-5xl font-bold font-display tracking-tight ${
               isDark ? 'text-white' : 'text-gray-950'
             }`}
@@ -110,12 +110,12 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
           </motion.h2>
         </div>
 
-        {/* macOS Style Window Console Frame around Certifications contents */}
+        {/* macOS Style Window Frame around Certifications contents */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={{ duration: 0.4, delay: 0.05, ease: 'easeOut' }}
           className={`rounded-3xl overflow-hidden shadow-2xl transition-all duration-300 mb-6 ${
             isDark 
               ? 'glass-panel-dark shadow-black/80' 
@@ -224,14 +224,22 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
         <AnimatePresence mode="popLayout">
           {filteredCertifications.length > 0 ? (
             <div className="space-y-6">
-              <motion.div className="flex flex-col gap-6">
+              <motion.div 
+                layout
+                transition={{ type: 'spring', stiffness: 500, damping: 45 }}
+                className="flex flex-col gap-6"
+              >
                 {filteredCertifications.slice(0, visibleCount).map((cert, index) => (
                 <motion.div
                   key={cert.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 12 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  viewport={{ once: true, margin: '-10px' }}
+                  transition={{ 
+                    opacity: { duration: 0.2 },
+                    y: { duration: 0.2 },
+                    layout: { type: 'spring', stiffness: 500, damping: 45 }
+                  }}
                   layout
                   className={`rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden ${
                     isDark 
@@ -375,7 +383,7 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                transition={{ type: 'spring', duration: 0.4 }}
+                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
                 className={`relative w-full max-w-2xl max-h-[92vh] sm:max-h-[85vh] flex flex-col rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-2xl z-10 border ${
                   isDark 
                     ? 'bg-[#0a0b10] border-white/10 text-white shadow-black/90' 

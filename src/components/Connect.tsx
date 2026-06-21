@@ -370,20 +370,20 @@ export default function Connect({ isDark, triggerHaptic }: ConnectProps) {
         {/* Section Header */}
         <div className="mb-14 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.5 }}
+            viewport={{ once: true, margin: '-20px' }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
             className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 font-roman text-xs tracking-[0.2em] uppercase mb-4"
           >
             <Radio size={14} className="animate-pulse" />
             <span>Get In Touch</span>
           </motion.div>
           <motion.h2
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            viewport={{ once: true, margin: '-20px' }}
+            transition={{ duration: 0.35, delay: 0.05, ease: 'easeOut' }}
             className={`text-3xl sm:text-4xl md:text-5.5xl font-roman tracking-wide ${
               isDark ? 'text-white' : 'text-black font-bold'
             }`}
@@ -397,10 +397,10 @@ export default function Connect({ isDark, triggerHaptic }: ConnectProps) {
 
         {/* Modern Mainframe Window wrapping the dual contact/quiz deck */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          viewport={{ once: true, margin: '-20px' }}
+          transition={{ duration: 0.4, delay: 0.05, ease: 'easeOut' }}
           className={`rounded-3xl overflow-hidden shadow-xl transition-all duration-500 ${
             isDark 
               ? 'glass-panel-dark shadow-black/80' 
