@@ -5,84 +5,19 @@ import { Sun, Moon, Menu, X, User, LayoutGrid, Award, Briefcase, FileText, Send,
 interface NavbarProps {
   isDark: boolean;
   onToggleTheme: () => void;
-  triggerHaptic: () => void;
+  triggerHaptic: (style?: 'light' | 'medium' | 'heavy' | 'success' | 'error') => void;
+  isPlaying: boolean;
+  onToggleMusic: () => void;
 }
 
-export default function Navbar({ isDark, onToggleTheme, triggerHaptic }: NavbarProps) {
+export default function Navbar({ isDark, onToggleTheme, triggerHaptic, isPlaying, onToggleMusic }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
   const [entryComplete, setEntryComplete] = useState(false);
-  
-  const [isPlaying, setIsPlaying] = useState(true);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const isNavigating = useRef(false);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-
-  // Initialize and handle backsound autoplay & user interaction hooks for seamless cross-browser playback
-  useEffect(() => {
-    const audio = new Audio('/Backsound-Portfolio-Music.mp3');
-    audio.loop = true;
-    audio.volume = 0.35; // optimal cozy ambient volume
-    audioRef.current = audio;
-
-    if (isPlaying) {
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.log("Autoplay blocked by browser policy. Music will play automatically upon first interaction.", error);
-        });
-      }
-    }
-
-    // Trigger audio block bypass on any screen interaction
-    const startAudioOnInteraction = () => {
-      if (isPlaying && audioRef.current && audioRef.current.paused) {
-        audioRef.current.play()
-          .then(() => {
-            cleanupListeners();
-          })
-          .catch((err) => {
-            console.log("Failed to start audio on interaction:", err);
-          });
-      }
-    };
-
-    const cleanupListeners = () => {
-      window.removeEventListener('click', startAudioOnInteraction, { capture: true });
-      window.removeEventListener('mousedown', startAudioOnInteraction, { capture: true });
-      window.removeEventListener('keydown', startAudioOnInteraction, { capture: true });
-      window.removeEventListener('touchstart', startAudioOnInteraction, { capture: true });
-    };
-
-    window.addEventListener('click', startAudioOnInteraction, { capture: true });
-    window.addEventListener('mousedown', startAudioOnInteraction, { capture: true });
-    window.addEventListener('keydown', startAudioOnInteraction, { capture: true });
-    window.addEventListener('touchstart', startAudioOnInteraction, { capture: true });
-
-    return () => {
-      cleanupListeners();
-      audio.pause();
-    };
-  }, []);
-
-  // Sync state transitions securely with HTML audio instance
-  useEffect(() => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.play().catch(err => {
-        console.log("Play gesture block: ", err);
-      });
-    } else {
-      audioRef.current.pause();
-    }
-  }, [isPlaying]);
-
-  const handleToggleMusic = () => {
-    triggerHaptic();
-    setIsPlaying(!isPlaying);
-  };
 
   // Dynamic tracking of scroll positioning with IntersectionObserver and passive scroll listener
   useEffect(() => {
@@ -146,7 +81,7 @@ export default function Navbar({ isDark, onToggleTheme, triggerHaptic }: NavbarP
   ];
 
   const handleLinkClick = (href: string) => {
-    triggerHaptic();
+    triggerHaptic('light');
     setIsOpen(false);
     
     const targetKey = href.replace('#', '');
@@ -242,7 +177,7 @@ export default function Navbar({ isDark, onToggleTheme, triggerHaptic }: NavbarP
               {/* Music Ambient Backsound Toggle Switch */}
               <button
                 id="music-toggle-btn"
-                onClick={handleToggleMusic}
+                onClick={onToggleMusic}
                 className={`relative h-10 w-10 flex items-center justify-center rounded-full transition-all duration-300 ${
                   isDark 
                     ? 'bg-white/10 hover:bg-white/15 text-blue-400 border border-white/5' 
@@ -274,7 +209,7 @@ export default function Navbar({ isDark, onToggleTheme, triggerHaptic }: NavbarP
               {/* Theme Toggle Switch */}
               <button
                 id="theme-toggle-btn"
-                onClick={() => { triggerHaptic(); onToggleTheme(); }}
+                onClick={() => { triggerHaptic('heavy'); onToggleTheme(); }}
                 className={`relative h-10 w-10 flex items-center justify-center rounded-full transition-all duration-300 ${
                   isDark 
                     ? 'bg-white/10 hover:bg-white/15 text-blue-400 border border-white/5' 
@@ -295,7 +230,7 @@ export default function Navbar({ isDark, onToggleTheme, triggerHaptic }: NavbarP
               {/* Mobile menu button */}
               <button
                 id="mobile-menu-trigger"
-                onClick={() => { triggerHaptic(); setIsOpen(!isOpen); }}
+                onClick={() => { triggerHaptic('medium'); setIsOpen(!isOpen); }}
                 className={`md:hidden p-2 rounded-full border transition-all duration-300 ${
                   isDark 
                     ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white' 

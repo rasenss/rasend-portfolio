@@ -6,7 +6,7 @@ import { WindowControls } from './WindowControls';
 
 interface ConnectProps {
   isDark: boolean;
-  triggerHaptic: () => void;
+  triggerHaptic: (style?: 'light' | 'medium' | 'heavy' | 'success' | 'error') => void;
 }
 
 interface Question {
@@ -258,7 +258,7 @@ export default function Connect({ isDark, triggerHaptic }: ConnectProps) {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    triggerHaptic();
+    triggerHaptic('medium');
     if (!formData.name || !formData.email || !formData.message) return;
 
     setLoading(true);
@@ -271,7 +271,7 @@ export default function Connect({ isDark, triggerHaptic }: ConnectProps) {
       setTimeout(() => {
         setLoading(false);
         setFormSubmitted(true);
-        triggerHaptic();
+        triggerHaptic('success');
 
         const subject = encodeURIComponent(`Portfolio Message from ${formData.name}`);
         const body = encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`);

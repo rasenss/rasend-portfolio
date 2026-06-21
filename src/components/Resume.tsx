@@ -7,7 +7,7 @@ import { WindowControls } from './WindowControls';
 
 interface ResumeProps {
   isDark: boolean;
-  triggerHaptic: () => void;
+  triggerHaptic: (style?: 'light' | 'medium' | 'heavy' | 'success' | 'error') => void;
 }
 
 export default function Resume({ isDark, triggerHaptic }: ResumeProps) {
@@ -27,7 +27,7 @@ export default function Resume({ isDark, triggerHaptic }: ResumeProps) {
 
   // Triggering visual CV download simulation
   const handleDownloadCV = () => {
-    triggerHaptic();
+    triggerHaptic('heavy');
     if (downloading) return;
     setDownloading(true);
     setDownloadSuccess(false);
@@ -349,7 +349,7 @@ export default function Resume({ isDark, triggerHaptic }: ResumeProps) {
 
       setDownloading(false);
       setDownloadSuccess(true);
-      triggerHaptic();
+      triggerHaptic('success');
 
       // Clear successful alert after 4 seconds
       setTimeout(() => {
@@ -363,7 +363,7 @@ export default function Resume({ isDark, triggerHaptic }: ResumeProps) {
   };
 
   const toggleExpand = (id: string) => {
-    triggerHaptic();
+    triggerHaptic('light');
     setExpandedId(expandedId === id ? null : id);
   };
 
@@ -602,7 +602,7 @@ export default function Resume({ isDark, triggerHaptic }: ResumeProps) {
                 <button
                   key={tab.key}
                   id={`tab-link-${tab.key}`}
-                  onClick={() => { triggerHaptic(); setActiveTab(tab.key); }}
+                  onClick={() => { triggerHaptic('medium'); setActiveTab(tab.key); }}
                   className={`relative flex-1 shrink-0 px-4 py-2.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wider uppercase transition-all duration-300 select-none cursor-pointer whitespace-nowrap text-center ${
                     activeTab === tab.key
                       ? isDark ? 'text-white' : 'text-zinc-900'
@@ -663,7 +663,7 @@ export default function Resume({ isDark, triggerHaptic }: ResumeProps) {
                   {/* Segment Content Card */}
                   <div
                     onClick={() => toggleExpand(item.id)}
-                    className={`rounded-3xl p-6 transition-all duration-300 border cursor-pointer select-none ${
+                    className={`rounded-3xl p-6 transition-[background-color,border-color,box-shadow] duration-200 border cursor-pointer select-none ${
                       isExpanded
                         ? isDark 
                           ? 'bg-white/[0.03] border-blue-500/30 shadow-xl' 
@@ -712,7 +712,7 @@ export default function Resume({ isDark, triggerHaptic }: ResumeProps) {
                       </button>
                     </div>
 
-                    <p className={`text-sm leading-relaxed mt-4 transition-all duration-300 ${
+                    <p className={`text-sm leading-relaxed mt-4 transition-colors duration-200 ${
                       isExpanded ? (isDark ? 'text-gray-300' : 'text-gray-700') : (isDark ? 'text-gray-400 line-clamp-1' : 'text-gray-600 line-clamp-1')
                     }`}>
                       {item.description}

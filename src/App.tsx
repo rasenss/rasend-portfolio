@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useState, useEffect, useRef } from 'react';
+import { motion } from 'motion/react';
 import { Heart, Copyright, Code2 } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -18,7 +18,86 @@ export default function App() {
     return false; // Light mode by default!
   });
 
-  // Apply CSS class lists on theme modification
+  // Ambient audio state initialized to true
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize and synchronise the background audio loop
+  useEffect(() => {
+    const audio = new Audio('/Backsound-Portfolio-Music.mp3');
+    audio.loop = true;
+    audio.volume = 0.35; // optimal friendly cozy volume
+    audioRef.current = audio;
+
+    // Direct immediate play attempt
+    const attemptPlay = () => {
+      audio.play()
+        .then(() => {
+          setIsPlaying(true);
+          cleanupListeners();
+        })
+        .catch((err) => {
+          console.log("Autoplay was prevented by browser security rules. Interactive handlers will activate upon screen action.", err);
+        });
+    };
+
+    attemptPlay();
+
+    // Trigger audio block bypass silent listeners on any microscopic browser movement/hover
+    const startAudioOnAction = () => {
+      if (audio.paused) {
+        audio.play()
+          .then(() => {
+            setIsPlaying(true);
+            cleanupListeners();
+          })
+          .catch((err) => {
+            console.log("Interactive audio unlock failed: ", err);
+          });
+      } else {
+        cleanupListeners();
+      }
+    };
+
+    const cleanupListeners = () => {
+      window.removeEventListener('click', startAudioOnAction, { capture: true });
+      window.removeEventListener('mousedown', startAudioOnAction, { capture: true });
+      window.removeEventListener('keydown', startAudioOnAction, { capture: true });
+      window.removeEventListener('touchstart', startAudioOnAction, { capture: true });
+      window.removeEventListener('pointerdown', startAudioOnAction, { capture: true });
+      window.removeEventListener('mousemove', startAudioOnAction, { capture: true });
+      window.removeEventListener('scroll', startAudioOnAction, { capture: true });
+      window.removeEventListener('wheel', startAudioOnAction, { capture: true });
+    };
+
+    window.addEventListener('click', startAudioOnAction, { capture: true });
+    window.addEventListener('mousedown', startAudioOnAction, { capture: true });
+    window.addEventListener('keydown', startAudioOnAction, { capture: true });
+    window.addEventListener('touchstart', startAudioOnAction, { capture: true });
+    window.addEventListener('pointerdown', startAudioOnAction, { capture: true });
+    window.addEventListener('mousemove', startAudioOnAction, { capture: true });
+    window.addEventListener('scroll', startAudioOnAction, { capture: true });
+    window.addEventListener('wheel', startAudioOnAction, { capture: true });
+
+    return () => {
+      cleanupListeners();
+      audio.pause();
+    };
+  }, []);
+
+  // Sync state transitions safely
+  useEffect(() => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.play().catch((err) => {
+        console.log("Audio play blocked by browser. Toggle button will recover.", err);
+      });
+    } else {
+      audioRef.current.pause();
+    }
+  }, [isPlaying]);
+
+  // Toggle visual theme class tags
   useEffect(() => {
     const root = window.document.documentElement;
     if (isDark) {
@@ -32,15 +111,96 @@ export default function App() {
     }
   }, [isDark]);
 
-  // Haptic feedback emulator using browser APIs
-  const triggerHaptic = () => {
+  // Premium synthetic haptic feedback engine (vibration + synthesized audio click)
+  const triggerHaptic = (style: 'light' | 'medium' | 'heavy' | 'success' | 'error' = 'light') => {
+    // 1. Browser physical vibration support
     if ('vibrate' in navigator) {
       try {
-        navigator.vibrate(10); // Subtle 10ms click vibration
-      } catch (err) {
-        // Safe lock, vibration might be blocked by environment constraints
-      }
+        if (style === 'success') {
+          navigator.vibrate([15, 45, 15, 45]);
+        } else if (style === 'heavy') {
+          navigator.vibrate(25);
+        } else if (style === 'medium') {
+          navigator.vibrate(15);
+        } else if (style === 'error') {
+          navigator.vibrate([30, 80, 40]);
+        } else {
+          navigator.vibrate(8); // Subtle 'light' feedback
+        }
+      } catch (err) {}
     }
+
+    // 2. Synthesize an ultra-short, premium tactile pop/click using Web Audio API
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      
+      osc.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      
+      const now = ctx.currentTime;
+      
+      if (style === 'success') {
+        // Double chime/success feedback
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+        gainNode.gain.setValueAtTime(0.06, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } else if (style === 'heavy') {
+        // Deep click, satisfying and solid
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(110, now);
+        osc.frequency.exponentialRampToValueAtTime(55, now + 0.08);
+        gainNode.gain.setValueAtTime(0.18, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.09);
+      } else if (style === 'medium') {
+        // High-contrast prompt click
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.exponentialRampToValueAtTime(90, now + 0.06);
+        gainNode.gain.setValueAtTime(0.12, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        osc.start(now);
+        osc.stop(now + 0.07);
+      } else if (style === 'error') {
+        // Error indicator dual drop
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.linearRampToValueAtTime(75, now + 0.12);
+        gainNode.gain.setValueAtTime(0.08, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.13);
+      } else {
+        // 'light' default: ultra quiet subtle tactile bubble tap (approx 35ms)
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(240, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.03);
+        
+        // Super tiny click volume blending perfectly
+        gainNode.gain.setValueAtTime(0.06, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+        
+        osc.start(now);
+        osc.stop(now + 0.04);
+      }
+    } catch (e) {
+      // Quiet fail if AudioContext is blocked or unsupported
+    }
+  };
+
+  const handleToggleMusic = () => {
+    triggerHaptic();
+    setIsPlaying(!isPlaying);
   };
 
   const toggleTheme = () => {
@@ -65,7 +225,13 @@ export default function App() {
       <div className="relative z-10 flex flex-col min-h-screen">
         
         {/* Absolute floating Header Navbar */}
-        <Navbar isDark={isDark} onToggleTheme={toggleTheme} triggerHaptic={triggerHaptic} />
+        <Navbar 
+          isDark={isDark} 
+          onToggleTheme={toggleTheme} 
+          triggerHaptic={triggerHaptic} 
+          isPlaying={isPlaying} 
+          onToggleMusic={handleToggleMusic} 
+        />
 
         {/* Content sections cascade */}
         <main className="flex-grow">
