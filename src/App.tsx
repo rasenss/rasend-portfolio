@@ -11,6 +11,7 @@ import Portfolio from './components/Portfolio';
 import Connect from './components/Connect';
 import QuotesRotator from './components/QuotesRotator';
 import { personalInfo } from './data';
+import RasendAI from './components/RasendAI';
 
 export default function App() {
   // Theme state defaulting to Light Mode as requested
@@ -212,13 +213,13 @@ export default function App() {
       
       {/* Immersive Atmospheric Backdrop Glowing meshes */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className={`absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full blur-[140px] transition-all duration-500 ${
-          isDark ? 'bg-blue-600/10' : 'bg-blue-300/5'
+        <div className={`absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full blur-[140px] bg-blue-500/10 transition-opacity duration-500 ${
+          isDark ? 'opacity-100' : 'opacity-30'
         }`}></div>
-        <div className={`absolute bottom-0 right-0 w-[800px] h-[800px] rounded-full blur-[160px] transition-all duration-500 ${
-          isDark ? 'bg-blue-500/5' : 'bg-blue-300/5'
+        <div className={`absolute bottom-0 right-0 w-[800px] h-[800px] rounded-full blur-[160px] bg-blue-500/5 transition-opacity duration-500 ${
+          isDark ? 'opacity-100' : 'opacity-40'
         }`}></div>
-        <div className={`absolute top-[45%] left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full blur-[150px] opacity-15 transition-all duration-500 bg-blue-500/5`}></div>
+        <div className={`absolute top-[45%] left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full blur-[150px] bg-blue-500/5 opacity-15`}></div>
       </div>
 
       {/* Structured Layout Items */}
@@ -301,8 +302,12 @@ export default function App() {
 
           </div>
         </footer>
+        
+        {/* Floating AI Agent Copilot */}
+        <RasendAI isDark={isDark} triggerHaptic={triggerHaptic} />
 
       </div>
+
     </div>
   );
 }

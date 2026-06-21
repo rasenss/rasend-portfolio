@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sun, Moon, Menu, X, User, LayoutGrid, Award, Briefcase, FileText, Send, Volume2, VolumeX } from 'lucide-react';
 
@@ -11,6 +12,11 @@ interface NavbarProps {
 }
 
 export default function Navbar({ isDark, onToggleTheme, triggerHaptic, isPlaying, onToggleMusic }: NavbarProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
@@ -104,23 +110,25 @@ export default function Navbar({ isDark, onToggleTheme, triggerHaptic, isPlaying
     }, 850);
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       {/* Top sticky navbar navigation container */}
-      <motion.header
+      <header
         id="navbar-header"
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        onAnimationComplete={() => setEntryComplete(true)}
-        style={entryComplete ? { transform: 'none' } : undefined}
-        transition={{ duration: 0.35, ease: 'easeOut' }}
         className={`fixed top-0 left-0 right-0 z-50 transition-[padding] duration-300 ${
           scrolled 
             ? 'py-3' 
             : 'py-5'
         }`}
       >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <motion.div 
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.35, ease: 'easeOut' }}
+          className="max-w-6xl mx-auto px-4 sm:px-6"
+        >
           <div className={`flex items-center justify-between rounded-full px-6 py-3 transition-[padding,background-color,border-color,box-shadow] duration-500 ${
             scrolled
               ? isDark 
@@ -143,7 +151,7 @@ export default function Navbar({ isDark, onToggleTheme, triggerHaptic, isPlaying
             </a>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1" id="navbar-desktop-menu">
+            <nav className="hidden lg:flex items-center gap-1" id="navbar-desktop-menu">
               {menuItems.map((item) => {
                 const isActive = activeSection === item.key;
                 return (
@@ -231,7 +239,7 @@ export default function Navbar({ isDark, onToggleTheme, triggerHaptic, isPlaying
               <button
                 id="mobile-menu-trigger"
                 onClick={() => { triggerHaptic('medium'); setIsOpen(!isOpen); }}
-                className={`md:hidden p-2 rounded-full border transition-all duration-300 ${
+                className={`lg:hidden p-2 rounded-full border transition-all duration-300 ${
                   isDark 
                     ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white' 
                     : 'bg-black/5 border-black/5 hover:bg-black/10 text-gray-900'
@@ -242,8 +250,8 @@ export default function Navbar({ isDark, onToggleTheme, triggerHaptic, isPlaying
             </div>
 
           </div>
-        </div>
-      </motion.header>
+        </motion.div>
+      </header>
 
       {/* Mobile Glass Drawer */}
       <AnimatePresence>
@@ -254,7 +262,7 @@ export default function Navbar({ isDark, onToggleTheme, triggerHaptic, isPlaying
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className={`fixed top-[74px] left-4 right-4 z-40 p-5 rounded-3xl md:hidden max-h-[80vh] overflow-y-auto ${
+            className={`fixed top-[74px] left-4 right-4 z-40 p-5 rounded-3xl lg:hidden max-h-[80vh] overflow-y-auto ${
               isDark 
                 ? 'bg-gray-950/95 border border-white/10 shadow-2xl backdrop-blur-lg text-white' 
                 : 'bg-white/95 border border-gray-200 shadow-2xl backdrop-blur-lg text-gray-900'
@@ -290,6 +298,7 @@ export default function Navbar({ isDark, onToggleTheme, triggerHaptic, isPlaying
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </>,
+    document.body
   );
 }
