@@ -108,9 +108,30 @@ export default async function handler(req: any, res: any) {
     const formattedContents = messages.map((msg: any) => {
       const role = msg.role === "assistant" ? "model" : "user";
       const textVal = typeof msg.content === "string" ? msg.content : "";
+      const parts: any[] = [{ text: textVal }];
+
+      // Support file attachments in chat messages (e.g. images, PDFs, text)
+      if (msg.attachments && Array.isArray(msg.attachments)) {
+        msg.attachments.forEach((att: any) => {
+          if (att.data && att.mimeType) {
+            // Strip data URL prefixes if they exist
+            let base64Data = att.data;
+            if (base64Data.includes(";base64,")) {
+              base64Data = base64Data.split(";base64,").pop();
+            }
+            parts.push({
+              inlineData: {
+                mimeType: att.mimeType,
+                data: base64Data
+              }
+            });
+          }
+        });
+      }
+
       return {
         role,
-        parts: [{ text: textVal }]
+        parts
       };
     });
 

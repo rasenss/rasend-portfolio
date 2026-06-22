@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { MessageSquare, X, Send, Sparkles, Bot, User, CornerDownLeft, Minimize2, Circle, Cpu } from "lucide-react";
+import { MessageSquare, X, Send, Sparkles, Bot, User, CornerDownLeft, Minimize2, Circle, Cpu, Paperclip, Mic, Volume2, VolumeX, FileText, Info } from "lucide-react";
 
 export function ConciergeBotIcon({ className = "w-6 h-6", size }: { className?: string; size?: number }) {
   return (
@@ -57,6 +57,7 @@ interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  attachments?: { name: string; mimeType: string; url: string; data: string }[];
 }
 
 interface RasendAIProps {
@@ -76,15 +77,204 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
     {
       id: "initial",
       role: "assistant",
-      content: "Halo! I am **Rasend Assistance**, your premium portfolio copilot. 🌟\n\nI can guide you through Rasendriya's professional expertise, timeline experiences at OneForma, academic credentials from Siber Muhammadiyah University, Red Hat Enterprise Linux configurations, or help you contact him.\n\nWhat would you like to explore today?"
+      content: "Halo! I am **Rasend Assistance**, your portfolio copilot. 🌟\n\nI can guide you through Rasendriya's professional expertise, timeline experiences at OneForma, academic credentials from Siber Muhammadiyah University, Red Hat Enterprise Linux configurations, or help you contact him.\n\nNow, you can also **upload image/document files** and **speak directly elements with voice** to interact with me!\n\nWhat would you like to explore today?"
     }
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(1);
 
+  // States for File Upload & Speech integrations
+  const [attachments, setAttachments] = useState<{ name: string; mimeType: string; url: string; data: string }[]>([]);
+  const [isListening, setIsListening] = useState(false);
+  const [speechEnabled, setSpeechEnabled] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [showUploadInfo, setShowUploadInfo] = useState(false);
+
   const feedRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
+
+  // Setup Speech Recognition Web API (lag-free, fully responsive, zero-dependencies)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const rec = new SpeechRecognition();
+        rec.continuous = true;
+        rec.interimResults = false;
+        // Supports conversational English & Indonesian inputs
+        rec.lang = "en-US";
+
+        rec.onresult = (e: any) => {
+          const transcript = e.results[e.results.length - 1][0].transcript;
+          setInputValue((prev) => (prev ? prev.trim() + " " + transcript.trim() : transcript.trim()));
+          triggerHaptic("light");
+        };
+
+        rec.onerror = (err: any) => {
+          console.warn("Speech recognition notice:", err.error);
+          setIsListening(false);
+        };
+
+        rec.onend = () => {
+          setIsListening(false);
+        };
+
+        recognitionRef.current = rec;
+      }
+    }
+  }, []);
+
+  // Sync speech synthesis voice reload
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      const handleVoicesChanged = () => {};
+      window.speechSynthesis.addEventListener("voiceschanged", handleVoicesChanged);
+      return () => {
+        window.speechSynthesis.removeEventListener("voiceschanged", handleVoicesChanged);
+      };
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      alert("Voice speech recognition is not supported as a native service in this browser. Please try Chrome or Safari!");
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+      triggerHaptic("medium");
+    } else {
+      setIsListening(true);
+      try {
+        recognitionRef.current.start();
+        triggerHaptic("success");
+      } catch (e) {
+        console.warn("Failed starting speech recognition", e);
+        setIsListening(false);
+      }
+    }
+  };
+
+  // Setup client-side Voice Synthesis audio output (SpeechSynthesis API)
+  const stripMarkdownForSpeech = (text: string) => {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, "$1") // bold
+      .replace(/\*(.*?)\*/g, "$1") // italics
+      .replace(/`{1,3}[\s\S]*?`{1,3}/g, "") // code/pre formats
+      .replace(/[-*]\s+/g, "") // bullet points
+      .replace(/#+\s+/g, "") // headings
+      .replace(/([:;_?!])/g, "$1 ") // extra pauses
+      .replace(/⚠️|🌟|❌|💡/g, "") // emojis
+      .trim();
+  };
+
+  const speakMessage = (text: string) => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+
+    window.speechSynthesis.cancel(); // Stop playing previous utterances
+    setIsSpeaking(false);
+
+    if (!text) return;
+
+    const cleanedText = stripMarkdownForSpeech(text);
+    const utterance = new SpeechSynthesisUtterance(cleanedText);
+
+    // Pick a natural English voice if available
+    const voices = window.speechSynthesis.getVoices();
+    const naturalVoice = voices.find(v => v.lang.startsWith("en") && v.name.includes("Natural")) ||
+                         voices.find(v => v.lang.startsWith("en") && (v.name.includes("Google") || v.name.includes("Apple"))) ||
+                         voices.find(v => v.lang.startsWith("en")) ||
+                         voices[0];
+
+    if (naturalVoice) {
+      utterance.voice = naturalVoice;
+    }
+
+    utterance.onstart = () => {
+      setIsSpeaking(true);
+    };
+
+    utterance.onend = () => {
+      setIsSpeaking(false);
+    };
+
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+    };
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  };
+
+  // Safe client-side file upload reading
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    const loadedFiles = Array.from(e.target.files) as File[];
+
+    if (attachments.length + loadedFiles.length > 5) {
+      alert("Maximum Upload Limit: You can attach up to 5 files per message.");
+      e.target.value = "";
+      return;
+    }
+
+    const permittedMimeTypes = [
+      "image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml",
+      "application/pdf", "text/plain", "text/markdown", "text/csv", "text/html", "text/css",
+      "application/json", "application/javascript", "application/typescript", "text/javascript"
+    ];
+
+    loadedFiles.forEach((file) => {
+      // 1. Max size validation
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`File "${file.name}" is too large! Maximum allowed size is 5MB.`);
+        return;
+      }
+
+      // 2. Mime type checks (permits images, standard text, PDFs, and general text/code documents)
+      const isMimePermitted = permittedMimeTypes.some(type => file.type === type) || 
+                              file.type.startsWith("image/") || 
+                              file.type.startsWith("text/") ||
+                              file.name.endsWith(".md") || 
+                              file.name.endsWith(".csv") ||
+                              file.name.endsWith(".json") ||
+                              file.name.endsWith(".txt") ||
+                              file.name.endsWith(".pdf");
+
+      if (!isMimePermitted) {
+        alert(`File "${file.name}" is not supported. Supported types: Images, PDFs, and Text (TXT, MD, CSV, JSON, CSS, JS, TS).`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        setAttachments((prev) => [
+          ...prev,
+          {
+            name: file.name,
+            mimeType: file.type || "application/octet-stream",
+            url: URL.createObjectURL(file),
+            data: base64,
+          }
+        ]);
+        triggerHaptic("light");
+      };
+      reader.readAsDataURL(file);
+    });
+
+    e.target.value = ""; // resets upload target pool
+  };
 
   // Auto scroll to latest reply
   useEffect(() => {
@@ -125,13 +315,28 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
   }, [isOpen]);
 
   const handleSendMessage = async (textToSend: string) => {
-    if (!textToSend.trim() || isLoading) return;
+    // Both text content and file uploaded are permitted message triggers
+    if ((!textToSend.trim() && attachments.length === 0) || isLoading) return;
 
     triggerHaptic("medium");
+    
+    // Stop speaking and close speech recognition when sending
+    stopSpeaking();
+    if (isListening && recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {}
+      setIsListening(false);
+    }
+
+    const currentAttachments = [...attachments];
+    setAttachments([]); // empty current files queue
+
     const userMessage: Message = {
       id: Math.random().toString(36).substring(7),
       role: "user",
       content: textToSend,
+      attachments: currentAttachments,
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -142,6 +347,11 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
       const messagesPayload = [...messages, userMessage].map((msg) => ({
         role: msg.role,
         content: msg.content,
+        attachments: msg.attachments ? msg.attachments.map(att => ({
+          name: att.name,
+          mimeType: att.mimeType,
+          data: att.data
+        })) : undefined
       }));
 
       const res = await fetch("/api/chat", {
@@ -169,6 +379,11 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
           },
         ]);
         triggerHaptic("success");
+
+        // Automatically read aloud the AI response if speech mode is enabled
+        if (speechEnabled) {
+          speakMessage(data.reply);
+        }
       } else {
         const errorMsg = data.error || "Unable to acquire completion right now.";
         const detailsMsg = data.details ? `\n\n**Details**: ${data.details}` : "";
@@ -265,15 +480,15 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
 
   return createPortal(
     <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 lg:bottom-8 lg:right-8 z-[9999999] select-none pointer-events-none flex flex-col items-end gap-4" id="rasend-ai-root">
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {/* Launch Floating Chat Card */}
-        {isOpen && (
+        {isOpen ? (
           <motion.div
             key="rasend-chat-card"
-            initial={{ opacity: 0, scale: 0.9, y: 30 }}
+            initial={{ opacity: 0, scale: 0.94, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 30 }}
-            transition={{ type: "spring", damping: 20, stiffness: 200 }}
+            exit={{ opacity: 0, scale: 0.94, y: 15 }}
+            transition={{ type: "spring", damping: 25, stiffness: 280 }}
             className={`w-[calc(100vw-32px)] sm:w-[420px] max-w-full h-[540px] max-h-[75vh] sm:max-h-[82vh] rounded-[24px] sm:rounded-[32px] overflow-hidden border flex flex-col shadow-2xl backdrop-blur-lg relative pointer-events-auto ${
               isDark 
                 ? "bg-zinc-950/20 border-white/10 text-white shadow-black/60" 
@@ -320,20 +535,52 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
                   </div>
                 </div>
 
-                {/* Close triggers */}
-                <button
-                  onClick={() => {
-                    triggerHaptic("heavy");
-                    setIsOpen(false);
-                  }}
-                  className={`p-2 rounded-xl transition-all relative z-20 ${
-                    isDark 
-                      ? "hover:bg-white/5 text-zinc-400 hover:text-white" 
-                      : "hover:bg-zinc-100/50 text-zinc-600 hover:text-zinc-900"
-                  }`}
-                >
-                  <Minimize2 size={16} />
-                </button>
+                <div className="flex items-center gap-1.5 relative z-25">
+                  {/* Speech Toggle Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = !speechEnabled;
+                      setSpeechEnabled(next);
+                      triggerHaptic("medium");
+                      if (next) {
+                        speakMessage("Voice active. I will read replies out loud.");
+                      } else {
+                        stopSpeaking();
+                      }
+                    }}
+                    title={speechEnabled ? "Mute auto-read" : "Speak replies aloud (Voice TTS)"}
+                    className={`p-2 rounded-xl transition-all relative cursor-pointer ${
+                      speechEnabled
+                        ? "bg-blue-500/15 border border-blue-500/30 text-blue-400 hover:text-blue-300"
+                        : isDark
+                          ? "hover:bg-white/5 text-zinc-400 hover:text-white"
+                          : "hover:bg-zinc-100/50 text-zinc-650 hover:text-zinc-950"
+                    }`}
+                  >
+                    {speechEnabled ? (
+                      <Volume2 size={16} className={isSpeaking ? "animate-bounce text-blue-400" : ""} />
+                    ) : (
+                      <VolumeX size={16} />
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic("heavy");
+                      stopSpeaking();
+                      setIsOpen(false);
+                    }}
+                    className={`p-2 rounded-xl transition-all relative z-20 cursor-pointer ${
+                      isDark 
+                        ? "hover:bg-white/5 text-zinc-400 hover:text-white" 
+                        : "hover:bg-zinc-100/50 text-zinc-600 hover:text-zinc-900"
+                    }`}
+                  >
+                    <Minimize2 size={16} />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -351,7 +598,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
                     initial={{ opacity: 0, y: 10, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ duration: 0.2 }}
-                    className={`flex gap-3 max-w-[85%] ${
+                    className={`flex gap-3 max-w-[85%] group/msg relative ${
                       msg.role === "user" ? "ml-auto" : "mr-auto"
                     }`}
                   >
@@ -361,7 +608,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
                       </div>
                     )}
                     <div
-                      className={`rounded-2xl px-4 py-3 leading-relaxed shadow-sm ${
+                      className={`rounded-2xl px-4 py-3 leading-relaxed shadow-sm relative overflow-hidden pb-4 ${
                         msg.role === "user"
                           ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-xs"
                           : isDark
@@ -369,7 +616,66 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
                             : "bg-black/[0.02] border border-black/5 text-zinc-800 rounded-tl-xs backdrop-blur-md"
                       }`}
                     >
+                      {/* Attached files output display */}
+                      {msg.attachments && msg.attachments.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {msg.attachments.map((file, fIdx) => (
+                            <div 
+                              key={fIdx} 
+                              className={`rounded-xl overflow-hidden max-w-[200px] border ${
+                                msg.role === "user" 
+                                  ? "border-white/20 bg-white/10" 
+                                  : isDark 
+                                    ? "border-white/10 bg-white/5" 
+                                    : "border-black/5 bg-black/5"
+                              }`}
+                            >
+                              {file.mimeType.startsWith("image/") ? (
+                                <img
+                                  referrerPolicy="no-referrer"
+                                  src={file.url || file.data}
+                                  alt={file.name}
+                                  className="w-full h-auto max-h-32 object-cover hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className={`p-2 flex items-center gap-1.5 text-xs font-mono truncate ${
+                                  msg.role === "user" ? "text-white" : isDark ? "text-zinc-200" : "text-zinc-800"
+                                }`}>
+                                  <FileText size={12} className={msg.role === "user" ? "text-blue-200 shrink-0" : "text-blue-500 shrink-0"} />
+                                  <span className="truncate max-w-[120px]" title={file.name}>{file.name}</span>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
                       {renderMessageContent(msg.content)}
+
+                      {/* Manual Speak/Stop Playback Buttons for Assistant element */}
+                      {msg.role === "assistant" && msg.id !== "initial" && (
+                        <div className="absolute right-2.5 bottom-1 opacity-0 group-hover/msg:opacity-100 transition-opacity duration-200 flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (isSpeaking) {
+                                stopSpeaking();
+                              } else {
+                                speakMessage(msg.content);
+                              }
+                            }}
+                            title="Read out loud"
+                            className={`p-1 rounded-lg border flex items-center gap-1 text-[10px] select-none transition-all cursor-pointer ${
+                              isDark 
+                                ? "bg-zinc-950 border-white/10 hover:bg-zinc-900 text-zinc-400 hover:text-white" 
+                                : "bg-white border-zinc-250 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-950"
+                            }`}
+                          >
+                            <Volume2 size={10} className={isSpeaking ? "animate-pulse text-blue-400" : ""} />
+                            <span>Speak</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 ))}
@@ -404,43 +710,209 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
             <div className={`p-4 border-t shrink-0 relative z-10 ${
               isDark ? "border-white/5 bg-zinc-950/30" : "border-black/5 bg-white/30"
             }`}>
-              <div className="relative flex items-center">
+              {/* Draft Attachments Preview */}
+              {attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-3 px-1 animate-fade-in relative z-20">
+                  {attachments.map((file, fIdx) => (
+                    <div 
+                      key={fIdx} 
+                      className={`relative flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-xl border text-xs font-sans ${
+                        isDark 
+                          ? "bg-white/5 border-white/10 text-white" 
+                          : "bg-zinc-100 border-black/10 text-zinc-800"
+                      }`}
+                    >
+                      {file.mimeType.startsWith("image/") ? (
+                        <div className="h-6 w-6 rounded overflow-hidden shrink-0">
+                          <img referrerPolicy="no-referrer" src={file.url} alt={file.name} className="h-full w-full object-cover" />
+                        </div>
+                      ) : (
+                        <FileText size={12} className="text-blue-550 shrink-0" />
+                      )}
+                      
+                      <span className="truncate max-w-[100px] font-mono text-[11px]">{file.name}</span>
+                      
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAttachments((prev) => prev.filter((_, idx) => idx !== fIdx));
+                          triggerHaptic("light");
+                        }}
+                        className={`p-0.5 rounded-md transition-all cursor-pointer ${
+                          isDark ? "hover:bg-white/10 text-zinc-400 hover:text-white" : "hover:bg-zinc-200 text-zinc-650 hover:text-zinc-950"
+                        }`}
+                      >
+                        <X size={10} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="relative flex items-center gap-2">
+                {/* File Upload Hidden Input Element */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  multiple
+                  className="hidden"
+                />
+
+                {/* Left Inner Action Controls (Glass buttons) */}
+                <div className="absolute left-2 flex items-center gap-1 z-10">
+                  {/* Paperclip upload button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic("light");
+                      fileInputRef.current?.click();
+                    }}
+                    disabled={isLoading}
+                    title="Attach image or document (max 5MB)"
+                    className={`p-1.5 rounded-xl transition-all cursor-pointer ${
+                      isDark 
+                        ? "hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-40" 
+                        : "hover:bg-zinc-200/70 text-zinc-500 hover:text-zinc-950 disabled:opacity-40"
+                    }`}
+                  >
+                    <Paperclip size={16} />
+                  </button>
+
+                  {/* Microphone speech input button */}
+                  <button
+                    type="button"
+                    onClick={toggleListening}
+                    disabled={isLoading}
+                    title={isListening ? "Stop listening voice input" : "Speak to AI"}
+                    className={`p-1.5 rounded-xl transition-all cursor-pointer relative ${
+                      isListening
+                        ? "bg-rose-500 text-white animate-pulse"
+                        : isDark
+                          ? "hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-40"
+                          : "hover:bg-zinc-200/70 text-zinc-500 hover:text-zinc-955 disabled:opacity-40"
+                    }`}
+                  >
+                    <Mic size={16} />
+                    {isListening && (
+                      <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-450 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
+                      </span>
+                    )}
+                  </button>
+                </div>
+
                 <input
                   ref={inputRef}
                   type="text"
-                  placeholder="Ask Rasend Assistance..."
+                  placeholder={isListening ? "Dictating your speech..." : "Ask Rasend Assistance..."}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyDown}
                   disabled={isLoading}
-                  className={`w-full rounded-2xl pr-12 pl-4 py-3.5 text-base md:text-sm transition-all focus:outline-none focus:ring-1 ${
+                  className={`w-full rounded-2xl pr-12 pl-20 py-3.5 text-base md:text-sm transition-all focus:outline-none focus:ring-1 ${
                     isDark 
-                      ? "bg-white/5 border-white/10 text-white focus:border-blue-500 focus:ring-blue-500/10 placeholder-zinc-500" 
-                      : "bg-zinc-100/80 border-black/10 text-zinc-900 focus:border-blue-500 focus:ring-blue-500/5 placeholder-zinc-400"
+                      ? "bg-white/5 border border-white/10 text-white focus:border-blue-500 focus:ring-blue-500/10 placeholder-zinc-500" 
+                      : "bg-zinc-100/80 border border-black/10 text-zinc-900 focus:border-blue-500 focus:ring-blue-500/5 placeholder-zinc-400"
                   }`}
                 />
                 
+                {/* Send Button */}
                 <button
+                  type="button"
                   onClick={() => handleSendMessage(inputValue)}
-                  disabled={!inputValue.trim() || isLoading}
+                  disabled={(attachments.length === 0 && !inputValue.trim()) || isLoading}
                   className={`absolute right-2.5 p-2 rounded-xl transition-all ${
-                    inputValue.trim() && !isLoading
+                    (inputValue.trim() || attachments.length > 0) && !isLoading
                       ? "bg-blue-500 hover:bg-blue-600 text-white shadow-md shadow-blue-500/10 cursor-pointer"
                       : isDark
-                        ? "text-zinc-600 cursor-not-allowed"
+                        ? "text-zinc-650 cursor-not-allowed"
                         : "text-zinc-400 cursor-not-allowed"
                   }`}
                 >
                   <Send size={14} />
                 </button>
               </div>
-              <div className="flex items-center justify-between mt-2.5 px-1">
-                <span className={`text-[10px] flex items-center gap-1 font-mono ${
-                  isDark ? "text-zinc-500" : "text-zinc-400"
-                }`}>
-                  <Sparkles size={10} className="text-blue-500" />
-                  Powered by Gemini 3.5
-                </span>
+              <div className="flex items-center justify-between mt-2.5 px-1 relative">
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] flex items-center gap-1 font-mono ${
+                    isDark ? "text-zinc-500" : "text-zinc-400"
+                  }`}>
+                    <Sparkles size={10} className="text-blue-500" />
+                    Powered by Gemini 3.5
+                  </span>
+
+                  <span className="text-[10px] text-zinc-500/50 select-none">•</span>
+
+                  {/* Upload Info Indicator */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowUploadInfo(!showUploadInfo);
+                        triggerHaptic("light");
+                      }}
+                      title="View file upload rules & limits"
+                      className={`text-[10px] flex items-center gap-1 font-mono hover:underline cursor-pointer transition-all ${
+                        isDark ? "text-zinc-550 hover:text-zinc-300" : "text-zinc-450 hover:text-zinc-700"
+                      }`}
+                    >
+                      <Info size={10} className="text-indigo-450 dark:text-indigo-400" />
+                      <span>Upload Limits</span>
+                    </button>
+
+                    <AnimatePresence>
+                      {showUploadInfo && (
+                        <>
+                          <div 
+                            className="fixed inset-0 z-[35]" 
+                            onClick={() => setShowUploadInfo(false)} 
+                          />
+                          <motion.div
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                            transition={{ duration: 0.15 }}
+                            style={{ bottom: "calc(100% + 8px)" }}
+                            className={`absolute left-0 z-40 w-64 p-3.5 rounded-2xl border shadow-xl flex flex-col gap-2 backdrop-blur-xl ${
+                              isDark 
+                                ? "bg-zinc-950/95 border-white/10 text-zinc-300 shadow-black/80" 
+                                : "bg-white/95 border-zinc-200/85 text-zinc-700 shadow-zinc-200/70"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between pb-1 border-b border-zinc-800/10 dark:border-white/5">
+                              <span className="text-xs font-bold text-blue-500 font-sans">Attachment Policy</span>
+                              <button
+                                type="button"
+                                onClick={() => setShowUploadInfo(false)}
+                                className="text-zinc-500 hover:text-zinc-350 cursor-pointer p-0.5"
+                              >
+                                <X size={10} />
+                              </button>
+                            </div>
+                            <div className="text-[11px] font-sans space-y-1.5 leading-normal text-left">
+                              <p>
+                                • <strong className={isDark ? "text-white" : "text-zinc-950"}>Max quantity:</strong> Up to <span className="text-indigo-500 font-bold font-mono">5 files</span> per prompt.
+                              </p>
+                              <p>
+                                • <strong className={isDark ? "text-white" : "text-zinc-950"}>Size limit:</strong> Max <span className="text-indigo-500 font-bold font-mono">5 MB</span> per file.
+                              </p>
+                              <p>
+                                • <strong className={isDark ? "text-white" : "text-zinc-950"}>Permitted formats:</strong>
+                                <span className={`block mt-1 p-1.5 rounded-lg text-[9.5px] font-mono leading-relaxed break-all ${
+                                  isDark ? "bg-white/5 text-zinc-450" : "bg-black/[0.03] text-zinc-650"
+                                }`}>
+                                  Images (jpg, png, webp, gif, svg), PDFs, TXT, MD, CSV, JSON, CSS, JS, TS
+                                </span>
+                              </p>
+                            </div>
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
                 
                 <span className={`text-[10px] flex items-center gap-1 font-mono uppercase tracking-wider ${
                   isDark ? "text-zinc-600" : "text-zinc-400"
@@ -451,17 +923,12 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
               </div>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Floating launcher action bar bubble in liquid glass */}
-      <AnimatePresence>
-        {!isOpen && (
+        ) : (
           <motion.button
             key="rasend-ai-launcher"
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
+            exit={{ opacity: 0, scale: 0.85 }}
             transition={{ type: "spring", stiffness: 350, damping: 25 }}
             onClick={() => {
               triggerHaptic("heavy");

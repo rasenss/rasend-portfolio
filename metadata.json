@@ -1,6 +1,6 @@
 {
   "name": "Rasendriya Khansa Jolankarfyan Portfolio",
   "description": "An elegant, glassmorphic, and fully-responsive portfolio website for Rasendriya Khansa Jolankarfyan, built with React, Tailwind CSS, and Framer Motion.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": ["microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
