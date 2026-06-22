@@ -418,15 +418,66 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
     }
   };
 
-  // Safe and fast HTML-free custom renderer to translate bullet lists and bold formatting inside model replies
+  // Safe and fast custom renderer to translate code blocks, inline code, lists, headers, and bold formatting inside model replies
   const renderMessageContent = (text: string) => {
+    if (!text) return null;
+
+    // Detect and parse code blocks wrapped in triple backticks
+    const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
+    const elements: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = codeBlockRegex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        const textSegment = text.substring(lastIndex, match.index);
+        elements.push(...parseParagraphsAndLists(textSegment, `text-${lastIndex}`));
+      }
+
+      const language = match[1] || "code";
+      const codeValue = match[2];
+      elements.push(
+        <div key={`code-${match.index}`} className="my-3 rounded-xl border border-black/10 dark:border-white/10 overflow-hidden shadow-sm max-w-full font-mono text-xs">
+          <div className="flex items-center justify-between px-3 py-1.5 bg-black/[0.04] dark:bg-white/5 border-b border-black/10 dark:border-white/10 select-none">
+            <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">{language}</span>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(codeValue);
+                triggerHaptic("success");
+              }}
+              className="text-[10px] text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-mono transition-colors hover:underline cursor-pointer"
+            >
+              Copy
+            </button>
+          </div>
+          <pre className="p-3 overflow-x-auto max-w-full whitespace-pre bg-black/[0.01]/70 dark:bg-zinc-950/40 text-zinc-800 dark:text-zinc-200 leading-normal scrollbar-thin">
+            <code>{codeValue}</code>
+          </pre>
+        </div>
+      );
+
+      lastIndex = codeBlockRegex.lastIndex;
+    }
+
+    if (lastIndex < text.length) {
+      const remainingText = text.substring(lastIndex);
+      elements.push(...parseParagraphsAndLists(remainingText, `text-end-${lastIndex}`));
+    }
+
+    return elements;
+  };
+
+  const parseParagraphsAndLists = (text: string, baseKey: string): React.ReactNode[] => {
     const paragraphs = text.split("\n\n");
     return paragraphs.map((para, pIdx) => {
+      const trimmedPara = para.trim();
+      if (!trimmedPara) return null;
+
       // Look for bullet lists
-      if (para.startsWith("- ") || para.startsWith("* ")) {
+      if (trimmedPara.startsWith("- ") || trimmedPara.startsWith("* ")) {
         const lines = para.split("\n");
         return (
-          <ul key={pIdx} className="list-disc pl-5 my-2 space-y-1 text-sm font-sans">
+          <ul key={`${baseKey}-${pIdx}`} className="list-disc pl-5 my-2 space-y-1.5 text-sm font-sans break-words [word-break:break-word] overflow-wrap-anywhere">
             {lines.map((ln, lIdx) => {
               const cleaned = ln.replace(/^[-*]\s+/, "");
               return <li key={lIdx}>{renderInlineFormats(cleaned)}</li>;
@@ -438,7 +489,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
       // Standard paragraphs
       const lines = para.split("\n");
       return (
-        <p key={pIdx} className="text-sm leading-relaxed mb-2 font-sans whitespace-pre-line">
+        <p key={`${baseKey}-${pIdx}`} className="text-sm leading-relaxed mb-2 font-sans whitespace-pre-line break-words [word-break:break-word] overflow-wrap-anywhere">
           {lines.map((line, lIdx) => (
             <span key={lIdx}>
               {renderInlineFormats(line)}
@@ -451,9 +502,33 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
   };
 
   const renderInlineFormats = (text: string) => {
-    // Basic bold markdown parser (**bold**)
+    const inlineCodeRegex = /`([^`]+)`/g;
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = inlineCodeRegex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(...parseBoldFormats(text.substring(lastIndex, match.index)));
+      }
+      parts.push(
+        <code key={`inline-code-${match.index}`} className="px-1.5 py-0.5 rounded-md font-mono text-xs bg-black/5 dark:bg-white/10 text-rose-600 dark:text-rose-400 break-all select-all font-semibold mx-0.5">
+          {match[1]}
+        </code>
+      );
+      lastIndex = inlineCodeRegex.lastIndex;
+    }
+
+    if (lastIndex < text.length) {
+      parts.push(...parseBoldFormats(text.substring(lastIndex)));
+    }
+
+    return parts.length > 0 ? parts : text;
+  };
+
+  const parseBoldFormats = (text: string): React.ReactNode[] => {
     const boldRegex = /\*\*(.*?)\*\*/g;
-    const parts = [];
+    const parts: React.ReactNode[] = [];
     let lastIndex = 0;
     let match;
 
@@ -462,7 +537,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
         parts.push(text.substring(lastIndex, match.index));
       }
       parts.push(
-        <strong key={match.index} className="text-blue-400 font-bold font-sans">
+        <strong key={`bold-${match.index}`} className="text-blue-600 dark:text-blue-400 font-bold font-sans">
           {match[1]}
         </strong>
       );
@@ -473,7 +548,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
       parts.push(text.substring(lastIndex));
     }
 
-    return parts.length > 0 ? parts : text;
+    return parts;
   };
 
   if (!mounted) return null;
@@ -598,7 +673,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
                     initial={{ opacity: 0, y: 10, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ duration: 0.2 }}
-                    className={`flex gap-3 max-w-[85%] group/msg relative ${
+                    className={`flex gap-3 max-w-[92%] sm:max-w-[85%] group/msg relative ${
                       msg.role === "user" ? "ml-auto" : "mr-auto"
                     }`}
                   >
@@ -608,7 +683,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
                       </div>
                     )}
                     <div
-                      className={`rounded-2xl px-4 py-3 leading-relaxed shadow-sm relative overflow-hidden pb-4 ${
+                      className={`rounded-2xl px-4 py-4 leading-relaxed shadow-sm relative overflow-visible pb-6 break-words [word-break:break-word] overflow-wrap-anywhere ${
                         msg.role === "user"
                           ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-xs"
                           : isDark
