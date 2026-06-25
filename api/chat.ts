@@ -135,18 +135,60 @@ export default async function handler(req: any, res: any) {
       };
     });
 
-    // Request Gemini completion using gemini-3.5-flash
-    const completion = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: formattedContents,
-      config: {
-        systemInstruction: portfolioInfoContext,
-        temperature: 0.7,
+    // Model downgrade chain: Prioritize the strongest, downgrade to highly resilient/lite versions if it fails
+    // We only use official, active, and fully-supported models under the @google/genai SDK to avoid unsupported model errors (400/404)
+    const FALLBACK_MODELS = [
+      "gemini-3.5-flash",         // Primary: Newest fast default text model
+      "gemini-3.1-flash-lite",    // Fallback 1: Extremely stable, highly resilient, lower resource demand, less prone to 503/429
+      "gemini-flash-latest",      // Fallback 2: Latest production-stable flash alias
+      "gemini-3.1-pro-preview",   // Fallback 3: Premium Pro model if available
+    ];
+
+    let completion: any = null;
+    let lastError: any = null;
+    let selectedModel = FALLBACK_MODELS[0];
+
+    for (const model of FALLBACK_MODELS) {
+      try {
+        console.log(`🤖 Attempting request with model: ${model}...`);
+        completion = await ai.models.generateContent({
+          model: model,
+          contents: formattedContents,
+          config: {
+            systemInstruction: portfolioInfoContext,
+            temperature: 0.7,
+          }
+        });
+        
+        selectedModel = model;
+        if (model !== FALLBACK_MODELS[0]) {
+          console.warn(`⚠️ High Demand Warning: Downgraded successfully to fallback model: ${model}`);
+        }
+        break; // Successfully got completion, exit fallback loop
+      } catch (err: any) {
+        lastError = err;
+        const statusCode = err.status || err.statusCode || err.status_code || "Unknown";
+        const errorMsg = err.message || String(err);
+        
+        console.error(`❌ Model ${model} returned error (Status: ${statusCode}): ${errorMsg}. Trying next model...`);
+        
+        // Continues to the next fallback model in line
+        continue;
       }
-    });
+    }
+
+    if (!completion) {
+      throw new Error(`All available Gemini models are currently overloaded. Last error: ${lastError?.message || lastError}`);
+    }
 
     const replyText = completion.text || "I am currently processing your inquiry, please try again soon.";
-    return res.status(200).json({ reply: replyText });
+    return res.status(200).json({ 
+      reply: replyText,
+      meta: {
+        modelUsed: selectedModel,
+        fallbackTriggered: selectedModel !== FALLBACK_MODELS[0]
+      }
+    });
 
   } catch (error: any) {
     console.error("Vercel Serverless Gemini API Error:", error);
