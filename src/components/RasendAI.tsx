@@ -654,37 +654,140 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
   };
 
   const parseParagraphsAndLists = (text: string, baseKey: string): React.ReactNode[] => {
-    const paragraphs = text.split("\n\n");
-    return paragraphs.map((para, pIdx) => {
-      const trimmedPara = para.trim();
-      if (!trimmedPara) return null;
+    if (!text) return [];
 
-      // Look for bullet lists
-      if (trimmedPara.startsWith("- ") || trimmedPara.startsWith("* ")) {
-        const lines = para.split("\n");
-        return (
-          <ul key={`${baseKey}-${pIdx}`} className="list-disc pl-5 my-2 space-y-1.5 text-sm font-sans break-words [word-break:break-word] overflow-wrap-anywhere">
-            {lines.map((ln, lIdx) => {
-              const cleaned = ln.replace(/^[-*]\s+/, "");
-              return <li key={lIdx}>{renderInlineFormats(cleaned)}</li>;
-            })}
+    const lines = text.split("\n");
+    const elements: React.ReactNode[] = [];
+    let currentBlockType: "paragraph" | "ul" | "ol" | "blockquote" | null = null;
+    let currentBlockLines: string[] = [];
+
+    const flushBlock = (index: number) => {
+      if (currentBlockLines.length === 0) return;
+
+      const key = `${baseKey}-block-${index}`;
+      if (currentBlockType === "ul") {
+        elements.push(
+          <ul key={key} className="list-disc pl-5 my-2.5 space-y-1.5 text-sm font-sans text-left break-words [word-break:break-word] overflow-wrap-anywhere">
+            {currentBlockLines.map((line, lIdx) => (
+              <li key={lIdx}>{renderInlineFormats(line)}</li>
+            ))}
           </ul>
+        );
+      } else if (currentBlockType === "ol") {
+        elements.push(
+          <ol key={key} className="list-decimal pl-5 my-2.5 space-y-1.5 text-sm font-sans text-left break-words [word-break:break-word] overflow-wrap-anywhere">
+            {currentBlockLines.map((line, lIdx) => (
+              <li key={lIdx}>{renderInlineFormats(line)}</li>
+            ))}
+          </ol>
+        );
+      } else if (currentBlockType === "blockquote") {
+        elements.push(
+          <blockquote key={key} className="pl-4 border-l-4 border-blue-500/50 dark:border-blue-400/50 my-2.5 italic text-sm text-zinc-500 dark:text-zinc-400 text-left py-0.5 font-sans break-words [word-break:break-word]">
+            {currentBlockLines.map((line, lIdx) => (
+              <p key={lIdx} className="mb-1 last:mb-0">
+                {renderInlineFormats(line)}
+              </p>
+            ))}
+          </blockquote>
+        );
+      } else if (currentBlockType === "paragraph") {
+        elements.push(
+          <p key={key} className="text-sm leading-relaxed mb-2.5 font-sans text-left break-words [word-break:break-word] overflow-wrap-anywhere">
+            {currentBlockLines.map((line, lIdx) => (
+              <span key={lIdx} className="block min-h-[0.5rem] last:inline">
+                {renderInlineFormats(line)}
+              </span>
+            ))}
+          </p>
         );
       }
 
-      // Standard paragraphs
-      const lines = para.split("\n");
-      return (
-        <p key={`${baseKey}-${pIdx}`} className="text-sm leading-relaxed mb-2 font-sans whitespace-pre-line break-words [word-break:break-word] overflow-wrap-anywhere">
-          {lines.map((line, lIdx) => (
-            <span key={lIdx}>
-              {renderInlineFormats(line)}
-              {lIdx < lines.length - 1 && <br />}
-            </span>
-          ))}
-        </p>
-      );
-    });
+      currentBlockLines = [];
+      currentBlockType = null;
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+      const rawLine = lines[i];
+      const trimmedLine = rawLine.trim();
+
+      // 1. Check for Headers
+      const headerMatch = rawLine.match(/^(#{1,6})\s+(.*)$/);
+      if (headerMatch) {
+        flushBlock(i);
+        const level = headerMatch[1].length;
+        const content = headerMatch[2];
+        const headerClasses = 
+          level === 1 ? "text-xl font-extrabold my-3 font-sans text-left" :
+          level === 2 ? "text-lg font-bold my-2.5 font-sans text-left" :
+          "text-base font-bold my-2 font-sans text-left";
+        
+        elements.push(
+          <div key={`${baseKey}-header-${i}`} className={`${headerClasses} text-zinc-900 dark:text-zinc-100`}>
+            {renderInlineFormats(content)}
+          </div>
+        );
+        continue;
+      }
+
+      // 2. Check for Horizontal Rule
+      if (trimmedLine === "---" || trimmedLine === "***" || trimmedLine === "___") {
+        flushBlock(i);
+        elements.push(
+          <hr key={`${baseKey}-hr-${i}`} className="my-4 border-t border-black/10 dark:border-white/10" />
+        );
+        continue;
+      }
+
+      // 3. Check for Blockquote
+      if (rawLine.startsWith(">")) {
+        if (currentBlockType !== "blockquote") {
+          flushBlock(i);
+          currentBlockType = "blockquote";
+        }
+        const content = rawLine.slice(1).replace(/^\s/, "");
+        currentBlockLines.push(content);
+        continue;
+      }
+
+      // 4. Check for Unordered List Item
+      const ulMatch = rawLine.match(/^(\s*)[-*•]\s+(.*)$/);
+      if (ulMatch) {
+        if (currentBlockType !== "ul") {
+          flushBlock(i);
+          currentBlockType = "ul";
+        }
+        currentBlockLines.push(ulMatch[2]);
+        continue;
+      }
+
+      // 5. Check for Ordered List Item
+      const olMatch = rawLine.match(/^(\s*)\d+\.\s+(.*)$/);
+      if (olMatch) {
+        if (currentBlockType !== "ol") {
+          flushBlock(i);
+          currentBlockType = "ol";
+        }
+        currentBlockLines.push(olMatch[2]);
+        continue;
+      }
+
+      // 6. Handle Blank Lines
+      if (trimmedLine === "") {
+        flushBlock(i);
+        continue;
+      }
+
+      // 7. Standard Paragraph Lines
+      if (currentBlockType !== "paragraph") {
+        flushBlock(i);
+        currentBlockType = "paragraph";
+      }
+      currentBlockLines.push(rawLine);
+    }
+
+    flushBlock(lines.length);
+    return elements;
   };
 
   const renderInlineFormats = (text: string) => {
@@ -713,21 +816,46 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
   };
 
   const parseBoldFormats = (text: string): React.ReactNode[] => {
-    const boldRegex = /\*\*(.*?)\*\*/g;
+    const boldRegex = /(\*\*|__)(.*?)\1/g;
     const parts: React.ReactNode[] = [];
     let lastIndex = 0;
     let match;
 
     while ((match = boldRegex.exec(text)) !== null) {
       if (match.index > lastIndex) {
-        parts.push(text.substring(lastIndex, match.index));
+        parts.push(...parseItalicFormats(text.substring(lastIndex, match.index)));
       }
       parts.push(
         <strong key={`bold-${match.index}`} className="text-blue-600 dark:text-blue-400 font-bold font-sans">
-          {match[1]}
+          {parseItalicFormats(match[2])}
         </strong>
       );
       lastIndex = boldRegex.lastIndex;
+    }
+
+    if (lastIndex < text.length) {
+      parts.push(...parseItalicFormats(text.substring(lastIndex)));
+    }
+
+    return parts;
+  };
+
+  const parseItalicFormats = (text: string): React.ReactNode[] => {
+    const italicRegex = /(\*|_)(.*?)\1/g;
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = italicRegex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(text.substring(lastIndex, match.index));
+      }
+      parts.push(
+        <em key={`italic-${match.index}`} className="italic font-sans">
+          {match[2]}
+        </em>
+      );
+      lastIndex = italicRegex.lastIndex;
     }
 
     if (lastIndex < text.length) {
@@ -750,10 +878,10 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 15 }}
             transition={{ type: "spring", damping: 25, stiffness: 280 }}
-            className={`w-[calc(100vw-32px)] sm:w-[420px] max-w-full h-[540px] max-h-[75vh] sm:max-h-[82vh] rounded-[24px] sm:rounded-[32px] overflow-hidden border flex flex-col shadow-2xl backdrop-blur-lg relative pointer-events-auto ${
+            className={`w-[calc(100vw-32px)] sm:w-[420px] max-w-full h-[540px] max-h-[75vh] sm:max-h-[82vh] rounded-[24px] sm:rounded-[32px] overflow-hidden border flex flex-col shadow-2xl backdrop-blur-xl relative pointer-events-auto ${
               isDark 
-                ? "bg-zinc-950/20 border-white/10 text-white shadow-black/60" 
-                : "bg-white/40 border-white/40 text-zinc-900 shadow-zinc-400/20"
+                ? "bg-zinc-950/95 border-white/10 text-white shadow-black/60" 
+                : "bg-white/95 border-zinc-200/80 text-zinc-900 shadow-zinc-400/20"
             }`}
           >
             {/* Absolute Liquid Glass Animated Backlight Globs */}
@@ -929,7 +1057,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
                             className={`p-1 rounded-lg border flex items-center gap-1 text-[10px] select-none transition-all cursor-pointer ${
                               isDark 
                                 ? "bg-zinc-950 border-white/10 hover:bg-zinc-900 text-zinc-400 hover:text-white" 
-                                : "bg-white border-zinc-250 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-950"
+                                : "bg-white border-zinc-200 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-950"
                             }`}
                           >
                             <Volume2 size={10} className={isSpeaking ? "animate-pulse text-blue-400" : ""} />

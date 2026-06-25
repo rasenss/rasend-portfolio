@@ -285,7 +285,7 @@ export default function App() {
             {/* Bottom Classical Roman Numeral Ledger Copyright */}
             <div className="flex flex-col items-center gap-3">
               <span className={`font-roman tracking-[0.18em] text-[10px] sm:text-xs uppercase ${
-                isDark ? 'text-blue-500/40' : 'text-blue-850/55'
+                isDark ? 'text-blue-500/40' : 'text-blue-800/55'
               }`}>
                 © MMXXVI · RASENDRIYA KHANSA · OMNIA OPERA
               </span>

@@ -202,14 +202,14 @@ export default function Skills({ isDark, triggerHaptic }: SkillsProps) {
             }`}>
               My Skills & Capabilities
             </h2>
-            <p className={`text-sm mt-3 max-w-xl leading-relaxed ${isDark ? 'text-zinc-400' : 'text-zinc-645'}`}>
+            <p className={`text-sm mt-3 max-w-xl leading-relaxed ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>
               Select a specialized domain card from my workforce stack to explore verified credentials, level of mastery, and core skill milestones.
             </p>
           </div>
 
           {/* Clean, minimalist Category Filter pill box */}
           <div className={`p-1 rounded-2xl border flex flex-wrap gap-1 md:self-end h-max max-w-max self-center ${
-            isDark ? 'bg-zinc-950/80 border-zinc-900' : 'bg-zinc-105 border-zinc-200/60'
+            isDark ? 'bg-zinc-950/80 border-zinc-900' : 'bg-zinc-100 border-zinc-200/60'
           }`}>
             {([
               { id: 'all', label: 'All Stack' },
@@ -310,8 +310,8 @@ export default function Skills({ isDark, triggerHaptic }: SkillsProps) {
                       } else {
                         cardBg = isDark 
                           ? 'bg-zinc-950/20 border-zinc-900 hover:border-zinc-800 hover:bg-zinc-900/10' 
-                          : 'bg-white border-zinc-200 hover:bg-zinc-50/40 hover:border-zinc-250 shadow-sm';
-                        iconBg = isDark ? 'bg-zinc-900 border border-zinc-850 text-zinc-400' : 'bg-zinc-100 border border-zinc-200 text-zinc-650';
+                          : 'bg-white border-zinc-200 hover:bg-zinc-50/40 hover:border-zinc-300 shadow-sm';
+                        iconBg = isDark ? 'bg-zinc-900 border border-zinc-800 text-zinc-400' : 'bg-zinc-100 border border-zinc-200 text-zinc-600';
                       }
 
                       return (
@@ -416,8 +416,8 @@ export default function Skills({ isDark, triggerHaptic }: SkillsProps) {
                   {/* Practical Value & Real-World Application Panel */}
                   <div className={`p-5 rounded-2xl border flex gap-4 transition-all duration-300 ${
                     isDark 
-                      ? 'bg-blue-955/5 border-blue-500/10' 
-                      : 'bg-blue-50/20 border-blue-105'
+                      ? 'bg-blue-950/5 border-blue-500/10' 
+                      : 'bg-blue-50/20 border-blue-100'
                   }`}>
                     <div className="h-10 w-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0 text-blue-600 dark:text-blue-400">
                       <Award size={20} />
@@ -429,7 +429,7 @@ export default function Skills({ isDark, triggerHaptic }: SkillsProps) {
                         My Skills Applied Focus
                       </h4>
                       <p className={`text-xs leading-relaxed transition-colors ${
-                        isDark ? 'text-zinc-400' : 'text-zinc-650'
+                        isDark ? 'text-zinc-400' : 'text-zinc-600'
                       }`}>
                         My practical development and domain certification in <strong className={isDark ? 'text-zinc-200' : 'text-zinc-900'}>{selectedSkill}</strong> signifies a rigorous commitment to robust standards. I leverage this focus area to: <span className="italic">{activeBlueprint.focusArea}</span>
                       </p>
