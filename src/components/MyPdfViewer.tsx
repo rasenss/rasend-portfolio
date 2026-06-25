@@ -149,6 +149,10 @@ export const MyPdfViewer: React.FC<MyPdfViewerProps> = ({ pdfUrl, isDark }) => {
 
         context.scale(pixelRatio, pixelRatio);
 
+        // Fill canvas with solid white background to ensure PDF text/content readability (standard for printed documents)
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, viewport.width, viewport.height);
+
         const renderContext = {
           canvasContext: context,
           viewport: viewport,

@@ -623,20 +623,28 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
       const language = match[1] || "code";
       const codeValue = match[2];
       elements.push(
-        <div key={`code-${match.index}`} className="my-3 rounded-xl border border-black/10 dark:border-white/10 overflow-hidden shadow-sm max-w-full font-mono text-xs">
-          <div className="flex items-center justify-between px-3 py-1.5 bg-black/[0.04] dark:bg-white/5 border-b border-black/10 dark:border-white/10 select-none">
+        <div key={`code-${match.index}`} className={`my-3 rounded-xl border overflow-hidden shadow-sm max-w-full font-mono text-xs ${
+          isDark ? "border-white/10" : "border-black/10"
+        }`}>
+          <div className={`flex items-center justify-between px-3 py-1.5 border-b select-none ${
+            isDark ? "bg-white/5 border-white/10" : "bg-black/[0.04] border-black/10"
+          }`}>
             <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">{language}</span>
             <button
               onClick={() => {
                 navigator.clipboard.writeText(codeValue);
                 triggerHaptic("success");
               }}
-              className="text-[10px] text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-mono transition-colors hover:underline cursor-pointer"
+              className={`text-[10px] font-mono transition-colors hover:underline cursor-pointer ${
+                isDark ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"
+              }`}
             >
               Copy
             </button>
           </div>
-          <pre className="p-3 overflow-x-auto max-w-full whitespace-pre bg-black/[0.01]/70 dark:bg-zinc-950/40 text-zinc-800 dark:text-zinc-200 leading-normal scrollbar-thin">
+          <pre className={`p-3 overflow-x-auto max-w-full whitespace-pre leading-normal scrollbar-thin ${
+            isDark ? "bg-zinc-950/40 text-zinc-200" : "bg-black/[0.01]/70 text-zinc-800"
+          }`}>
             <code>{codeValue}</code>
           </pre>
         </div>
@@ -667,7 +675,9 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
       const key = `${baseKey}-block-${index}`;
       if (currentBlockType === "ul") {
         elements.push(
-          <ul key={key} className="list-disc pl-5 my-2.5 space-y-1.5 text-sm font-sans text-left break-words [word-break:break-word] overflow-wrap-anywhere">
+          <ul key={key} className={`list-disc pl-5 my-2.5 space-y-1.5 text-sm font-sans text-left break-words [word-break:break-word] overflow-wrap-anywhere ${
+            isUser ? "text-white" : isDark ? "text-zinc-100" : "text-zinc-900"
+          }`}>
             {currentBlockLines.map((line, lIdx) => (
               <li key={lIdx}>{renderInlineFormats(line, isUser)}</li>
             ))}
@@ -675,7 +685,9 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
         );
       } else if (currentBlockType === "ol") {
         elements.push(
-          <ol key={key} className="list-decimal pl-5 my-2.5 space-y-1.5 text-sm font-sans text-left break-words [word-break:break-word] overflow-wrap-anywhere">
+          <ol key={key} className={`list-decimal pl-5 my-2.5 space-y-1.5 text-sm font-sans text-left break-words [word-break:break-word] overflow-wrap-anywhere ${
+            isUser ? "text-white" : isDark ? "text-zinc-100" : "text-zinc-900"
+          }`}>
             {currentBlockLines.map((line, lIdx) => (
               <li key={lIdx}>{renderInlineFormats(line, isUser)}</li>
             ))}
@@ -683,7 +695,13 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
         );
       } else if (currentBlockType === "blockquote") {
         elements.push(
-          <blockquote key={key} className="pl-4 border-l-4 border-blue-600 dark:border-blue-400 my-2.5 italic text-sm text-zinc-700 dark:text-zinc-200 text-left py-0.5 font-sans break-words [word-break:break-word]">
+          <blockquote key={key} className={`pl-4 border-l-4 my-2.5 italic text-sm text-left py-0.5 font-sans break-words [word-break:break-word] ${
+            isUser 
+              ? "border-blue-200 text-blue-100" 
+              : isDark 
+                ? "border-blue-400 text-zinc-300" 
+                : "border-blue-600 text-zinc-700"
+          }`}>
             {currentBlockLines.map((line, lIdx) => (
               <p key={lIdx} className="mb-1 last:mb-0">
                 {renderInlineFormats(line, isUser)}
@@ -693,7 +711,9 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
         );
       } else if (currentBlockType === "paragraph") {
         elements.push(
-          <p key={key} className="text-sm leading-relaxed mb-2.5 font-sans text-left break-words [word-break:break-word] overflow-wrap-anywhere">
+          <p key={key} className={`text-sm leading-relaxed mb-2.5 font-sans text-left break-words [word-break:break-word] overflow-wrap-anywhere ${
+            isUser ? "text-white" : isDark ? "text-zinc-100" : "text-zinc-900"
+          }`}>
             {currentBlockLines.map((line, lIdx) => (
               <span key={lIdx} className="block min-h-[0.5rem] last:inline">
                 {renderInlineFormats(line, isUser)}
@@ -723,7 +743,13 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
           "text-base font-bold my-2 font-sans text-left";
         
         elements.push(
-          <div key={`${baseKey}-header-${i}`} className={`${headerClasses} text-zinc-900 dark:text-zinc-100`}>
+          <div key={`${baseKey}-header-${i}`} className={`${headerClasses} ${
+            isUser 
+              ? "text-white" 
+              : isDark 
+                ? "text-zinc-100" 
+                : "text-zinc-900"
+          }`}>
             {renderInlineFormats(content, isUser)}
           </div>
         );
@@ -734,7 +760,9 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
       if (trimmedLine === "---" || trimmedLine === "***" || trimmedLine === "___") {
         flushBlock(i);
         elements.push(
-          <hr key={`${baseKey}-hr-${i}`} className="my-4 border-t border-black/10 dark:border-white/10" />
+          <hr key={`${baseKey}-hr-${i}`} className={`my-4 border-t ${
+            isDark ? "border-white/10" : "border-black/10"
+          }`} />
         );
         continue;
       }
@@ -834,7 +862,13 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
         parts.push(...parseBoldFormats(text.substring(lastIndex, match.index), isUser));
       }
       parts.push(
-        <code key={`inline-code-${match.index}`} className="px-1.5 py-0.5 rounded-md font-mono text-xs bg-black/5 dark:bg-white/10 text-rose-600 dark:text-rose-400 break-all select-all font-semibold mx-0.5">
+        <code key={`inline-code-${match.index}`} className={`px-1.5 py-0.5 rounded-md font-mono text-xs break-all select-all font-semibold mx-0.5 ${
+          isUser
+            ? "bg-white/25 text-white"
+            : isDark 
+              ? "bg-white/10 text-rose-400" 
+              : "bg-black/5 text-rose-600"
+        }`}>
           {match[1]}
         </code>
       );
@@ -862,7 +896,9 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
         <strong key={`bold-${match.index}`} className={
           isUser 
             ? "text-white font-extrabold font-sans" 
-            : "text-blue-800 dark:text-blue-400 font-extrabold font-sans"
+            : isDark
+              ? "text-blue-400 font-extrabold font-sans"
+              : "text-blue-800 font-extrabold font-sans"
         }>
           {parseItalicFormats(match[2])}
         </strong>
@@ -1290,7 +1326,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
                         isDark ? "text-zinc-550 hover:text-zinc-300" : "text-zinc-450 hover:text-zinc-700"
                       }`}
                     >
-                      <Info size={10} className="text-indigo-450 dark:text-indigo-400" />
+                      <Info size={10} className={isDark ? "text-indigo-400" : "text-indigo-600"} />
                       <span>Upload Limits</span>
                     </button>
 
@@ -1313,7 +1349,9 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
                                 : "bg-white/95 border-zinc-200/85 text-zinc-700 shadow-zinc-200/70"
                             }`}
                           >
-                            <div className="flex items-center justify-between pb-1 border-b border-zinc-800/10 dark:border-white/5">
+                            <div className={`flex items-center justify-between pb-1 border-b ${
+                              isDark ? "border-white/5" : "border-zinc-800/10"
+                            }`}>
                               <span className="text-xs font-bold text-blue-500 font-sans">Attachment Policy</span>
                               <button
                                 type="button"
