@@ -605,7 +605,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
   };
 
   // Safe and fast custom renderer to translate code blocks, inline code, lists, headers, and bold formatting inside model replies
-  const renderMessageContent = (text: string) => {
+  const renderMessageContent = (text: string, isUser: boolean = false) => {
     if (!text) return null;
 
     // Detect and parse code blocks wrapped in triple backticks
@@ -617,7 +617,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
     while ((match = codeBlockRegex.exec(text)) !== null) {
       if (match.index > lastIndex) {
         const textSegment = text.substring(lastIndex, match.index);
-        elements.push(...parseParagraphsAndLists(textSegment, `text-${lastIndex}`));
+        elements.push(...parseParagraphsAndLists(textSegment, `text-${lastIndex}`, isUser));
       }
 
       const language = match[1] || "code";
@@ -647,13 +647,13 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
 
     if (lastIndex < text.length) {
       const remainingText = text.substring(lastIndex);
-      elements.push(...parseParagraphsAndLists(remainingText, `text-end-${lastIndex}`));
+      elements.push(...parseParagraphsAndLists(remainingText, `text-end-${lastIndex}`, isUser));
     }
 
     return elements;
   };
 
-  const parseParagraphsAndLists = (text: string, baseKey: string): React.ReactNode[] => {
+  const parseParagraphsAndLists = (text: string, baseKey: string, isUser: boolean = false): React.ReactNode[] => {
     if (!text) return [];
 
     const lines = text.split("\n");
@@ -669,7 +669,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
         elements.push(
           <ul key={key} className="list-disc pl-5 my-2.5 space-y-1.5 text-sm font-sans text-left break-words [word-break:break-word] overflow-wrap-anywhere">
             {currentBlockLines.map((line, lIdx) => (
-              <li key={lIdx}>{renderInlineFormats(line)}</li>
+              <li key={lIdx}>{renderInlineFormats(line, isUser)}</li>
             ))}
           </ul>
         );
@@ -677,16 +677,16 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
         elements.push(
           <ol key={key} className="list-decimal pl-5 my-2.5 space-y-1.5 text-sm font-sans text-left break-words [word-break:break-word] overflow-wrap-anywhere">
             {currentBlockLines.map((line, lIdx) => (
-              <li key={lIdx}>{renderInlineFormats(line)}</li>
+              <li key={lIdx}>{renderInlineFormats(line, isUser)}</li>
             ))}
           </ol>
         );
       } else if (currentBlockType === "blockquote") {
         elements.push(
-          <blockquote key={key} className="pl-4 border-l-4 border-blue-500/50 dark:border-blue-400/50 my-2.5 italic text-sm text-zinc-500 dark:text-zinc-400 text-left py-0.5 font-sans break-words [word-break:break-word]">
+          <blockquote key={key} className="pl-4 border-l-4 border-blue-600 dark:border-blue-400 my-2.5 italic text-sm text-zinc-700 dark:text-zinc-200 text-left py-0.5 font-sans break-words [word-break:break-word]">
             {currentBlockLines.map((line, lIdx) => (
               <p key={lIdx} className="mb-1 last:mb-0">
-                {renderInlineFormats(line)}
+                {renderInlineFormats(line, isUser)}
               </p>
             ))}
           </blockquote>
@@ -696,7 +696,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
           <p key={key} className="text-sm leading-relaxed mb-2.5 font-sans text-left break-words [word-break:break-word] overflow-wrap-anywhere">
             {currentBlockLines.map((line, lIdx) => (
               <span key={lIdx} className="block min-h-[0.5rem] last:inline">
-                {renderInlineFormats(line)}
+                {renderInlineFormats(line, isUser)}
               </span>
             ))}
           </p>
@@ -724,7 +724,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
         
         elements.push(
           <div key={`${baseKey}-header-${i}`} className={`${headerClasses} text-zinc-900 dark:text-zinc-100`}>
-            {renderInlineFormats(content)}
+            {renderInlineFormats(content, isUser)}
           </div>
         );
         continue;
@@ -745,7 +745,10 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
           flushBlock(i);
           currentBlockType = "blockquote";
         }
-        const content = rawLine.slice(1).replace(/^\s/, "");
+        let content = rawLine.slice(1).trim();
+        while (content.startsWith(">")) {
+          content = content.slice(1).trim();
+        }
         currentBlockLines.push(content);
         continue;
       }
@@ -757,7 +760,22 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
           flushBlock(i);
           currentBlockType = "ul";
         }
-        currentBlockLines.push(ulMatch[2]);
+        let content = ulMatch[2].trim();
+        while (content.startsWith(">") || content.startsWith("*") || content.startsWith("-") || content.startsWith("•")) {
+          if (content.startsWith(">")) {
+            content = content.slice(1).trim();
+          } else if ((content.startsWith("*") && !content.startsWith("**")) || content.startsWith("-") || content.startsWith("•")) {
+            const nextChar = content.charAt(1);
+            if (nextChar === " " || nextChar === "\t" || nextChar === "") {
+              content = content.slice(1).trim();
+            } else {
+              break;
+            }
+          } else {
+            break;
+          }
+        }
+        currentBlockLines.push(content);
         continue;
       }
 
@@ -768,7 +786,22 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
           flushBlock(i);
           currentBlockType = "ol";
         }
-        currentBlockLines.push(olMatch[2]);
+        let content = olMatch[2].trim();
+        while (content.startsWith(">") || content.startsWith("*") || content.startsWith("-") || content.startsWith("•")) {
+          if (content.startsWith(">")) {
+            content = content.slice(1).trim();
+          } else if ((content.startsWith("*") && !content.startsWith("**")) || content.startsWith("-") || content.startsWith("•")) {
+            const nextChar = content.charAt(1);
+            if (nextChar === " " || nextChar === "\t" || nextChar === "") {
+              content = content.slice(1).trim();
+            } else {
+              break;
+            }
+          } else {
+            break;
+          }
+        }
+        currentBlockLines.push(content);
         continue;
       }
 
@@ -790,7 +823,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
     return elements;
   };
 
-  const renderInlineFormats = (text: string) => {
+  const renderInlineFormats = (text: string, isUser: boolean = false) => {
     const inlineCodeRegex = /`([^`]+)`/g;
     const parts: React.ReactNode[] = [];
     let lastIndex = 0;
@@ -798,7 +831,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
 
     while ((match = inlineCodeRegex.exec(text)) !== null) {
       if (match.index > lastIndex) {
-        parts.push(...parseBoldFormats(text.substring(lastIndex, match.index)));
+        parts.push(...parseBoldFormats(text.substring(lastIndex, match.index), isUser));
       }
       parts.push(
         <code key={`inline-code-${match.index}`} className="px-1.5 py-0.5 rounded-md font-mono text-xs bg-black/5 dark:bg-white/10 text-rose-600 dark:text-rose-400 break-all select-all font-semibold mx-0.5">
@@ -809,13 +842,13 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
     }
 
     if (lastIndex < text.length) {
-      parts.push(...parseBoldFormats(text.substring(lastIndex)));
+      parts.push(...parseBoldFormats(text.substring(lastIndex), isUser));
     }
 
     return parts.length > 0 ? parts : text;
   };
 
-  const parseBoldFormats = (text: string): React.ReactNode[] => {
+  const parseBoldFormats = (text: string, isUser: boolean = false): React.ReactNode[] => {
     const boldRegex = /(\*\*|__)(.*?)\1/g;
     const parts: React.ReactNode[] = [];
     let lastIndex = 0;
@@ -826,7 +859,11 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
         parts.push(...parseItalicFormats(text.substring(lastIndex, match.index)));
       }
       parts.push(
-        <strong key={`bold-${match.index}`} className="text-blue-600 dark:text-blue-400 font-bold font-sans">
+        <strong key={`bold-${match.index}`} className={
+          isUser 
+            ? "text-white font-extrabold font-sans" 
+            : "text-blue-800 dark:text-blue-400 font-extrabold font-sans"
+        }>
           {parseItalicFormats(match[2])}
         </strong>
       );
@@ -1002,7 +1039,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
                           ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-xs"
                           : isDark
                             ? "bg-white/[0.04] border border-white/5 text-zinc-100 rounded-tl-xs backdrop-blur-md"
-                            : "bg-black/[0.02] border border-black/5 text-zinc-800 rounded-tl-xs backdrop-blur-md"
+                            : "bg-black/[0.02] border border-black/5 text-zinc-900 rounded-tl-xs backdrop-blur-md"
                       }`}
                     >
                       {/* Attached files output display */}
@@ -1039,7 +1076,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
                         </div>
                       )}
 
-                      {renderMessageContent(msg.content)}
+                      {renderMessageContent(msg.content, msg.role === "user")}
 
                       {/* Manual Speak/Stop Playback Buttons for Assistant element */}
                       {msg.role === "assistant" && msg.id !== "initial" && (
