@@ -90,6 +90,9 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
   const [speechEnabled, setSpeechEnabled] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showUploadInfo, setShowUploadInfo] = useState(false);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoiceName, setSelectedVoiceName] = useState<string>("");
+  const [currentModel, setCurrentModel] = useState<string>("gemini-3.5-flash");
 
   const feedRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -130,10 +133,61 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
   // Sync speech synthesis voice reload
   useEffect(() => {
     if (typeof window !== "undefined" && window.speechSynthesis) {
-      const handleVoicesChanged = () => {};
-      window.speechSynthesis.addEventListener("voiceschanged", handleVoicesChanged);
+      const updateVoices = () => {
+        const available = window.speechSynthesis.getVoices();
+        
+        // Filter primarily English (with strong preference for US native) and Indonesian voices
+        const filtered = available.filter(
+          v => v.lang.startsWith("en") || v.lang.startsWith("id")
+        );
+        
+        // Sort: Prioritize US English (en-US) high-quality human-like voices
+        const sorted = [...filtered].sort((a, b) => {
+          const score = (v: SpeechSynthesisVoice) => {
+            let s = 0;
+            const nameLower = v.name.toLowerCase();
+            const langLower = v.lang.toLowerCase();
+            
+            // Give massive boost to US native English
+            if (langLower === "en-us" || langLower === "en_us") {
+              s += 200;
+            } else if (langLower.startsWith("en")) {
+              s += 50;
+            }
+            
+            // Boost for high-quality human-like voices
+            if (nameLower.includes("natural")) s += 150;
+            if (nameLower.includes("neural")) s += 100;
+            if (nameLower.includes("online")) s += 80;
+            if (nameLower.includes("google")) s += 60;
+            if (nameLower.includes("samantha")) s += 50;
+            if (nameLower.includes("apple")) s += 40;
+            if (nameLower.includes("microsoft")) s += 30;
+            if (nameLower.includes("enhanced")) s += 20;
+            
+            return s;
+          };
+          return score(b) - score(a);
+        });
+
+        setVoices(sorted);
+
+        // Try to set a premium US native voice as the default voice
+        if (sorted.length > 0) {
+          const defaultVoice = sorted.find(v => v.lang.toLowerCase().includes("us") && v.name.toLowerCase().includes("natural")) ||
+                               sorted.find(v => v.lang.toLowerCase().includes("us") && v.name.toLowerCase().includes("google")) ||
+                               sorted.find(v => v.lang.toLowerCase().includes("us") && v.name.toLowerCase().includes("samantha")) ||
+                               sorted.find(v => v.lang.toLowerCase().includes("us")) ||
+                               sorted.find(v => v.name.toLowerCase().includes("natural")) ||
+                               sorted[0];
+          setSelectedVoiceName(prev => prev || defaultVoice.name);
+        }
+      };
+
+      updateVoices();
+      window.speechSynthesis.addEventListener("voiceschanged", updateVoices);
       return () => {
-        window.speechSynthesis.removeEventListener("voiceschanged", handleVoicesChanged);
+        window.speechSynthesis.removeEventListener("voiceschanged", updateVoices);
       };
     }
   }, []);
@@ -173,6 +227,76 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
       .trim();
   };
 
+  const detectLanguage = (text: string): string => {
+    const clean = text.toLowerCase().trim();
+    if (!clean) return "en";
+
+    // 1. Script/Unicode Range Detection (Extremely accurate)
+    if (/[\u3040-\u309F\u30A0-\u30FF]/.test(clean)) return "ja"; // Japanese Hiragana/Katakana
+    if (/[\uAC00-\uD7AF]/.test(clean)) return "ko"; // Korean Hangul
+    if (/[\u4E00-\u9FFF]/.test(clean)) return "zh"; // Chinese Hanzi
+    if (/[\u0600-\u06FF]/.test(clean)) return "ar"; // Arabic
+    if (/[\u0400-\u04FF]/.test(clean)) return "ru"; // Russian Cyrillic
+
+    // 2. Word frequency classification for Latin script languages
+    const words = clean.split(/\s+/);
+    const scores: { [key: string]: number } = {
+      en: 0,
+      id: 0,
+      es: 0,
+      fr: 0,
+      de: 0,
+      it: 0,
+      pt: 0
+    };
+
+    const wordLists: { [key: string]: Set<string> } = {
+      en: new Set([
+        "the", "and", "of", "to", "a", "in", "is", "you", "that", "it", "for", "on", "are", "as", "with", "his", "they", "i", "at", "be", "this", "have", "from", "or", "one", "had", "by", "word", "but", "not", "what", "all", "were", "we", "when", "your", "can", "said", "there", "use", "an", "each", "which", "she", "do", "how", "their", "if", "will", "up", "other", "about", "out", "many", "then", "them", "these", "so", "some", "her", "would", "make", "like", "him", "into", "time", "has", "look", "two", "more", "write", "go", "see", "number", "no", "way", "could", "people", "my", "than", "first", "water", "been", "call", "who", "oil", "its", "now", "find", "hello", "thanks", "welcome", "please"
+      ]),
+      id: new Set([
+        "dan", "yang", "untuk", "dengan", "saya", "kamu", "bisa", "adalah", "ada", "ini", "itu", "dari", "ke", "di", "pada", "terima", "kasih", "halo", "selamat", "anda", "apakah", "tidak", "ya", "kita", "kami", "mereka", "dia", "pagi", "siang", "sore", "malam", "buat", "kerja", "tolong", "mohon", "apa", "kabar", "bagaimana", "mengapa", "karena", "maka", "juga", "atau", "tentang", "seperti", "sudah", "belum", "akan", "telah", "oleh", "dalam", "untuk", "oleh", "sebagai", "lebih", "sangat", "baik", "banyak"
+      ]),
+      es: new Set([
+        "y", "el", "la", "de", "que", "un", "una", "en", "es", "con", "por", "para", "como", "esta", "este", "hola", "gracias", "nosotros", "usted", "buenos", "días", "si", "no", "cómo", "los", "las", "del", "al", "lo", "su", "sus", "pero", "o", "más", "mi", "mis", "muy", "bien", "todo", "todos", "hacer", "quiero", "puedo", "tiene", "tengo", "estar", "ser", "por", "favor", "de", "nada"
+      ]),
+      fr: new Set([
+        "et", "le", "la", "de", "que", "un", "une", "en", "est", "avec", "pour", "dans", "nous", "vous", "bonjour", "merci", "salut", "s'il", "plaît", "oui", "non", "comment", "les", "des", "du", "au", "aux", "par", "sur", "mais", "ou", "plus", "mon", "ma", "mes", "très", "bien", "tout", "tous", "faire", "veux", "peux", "a", "suis", "être", "avoir", "de", "rien"
+      ]),
+      de: new Set([
+        "und", "der", "die", "das", "ein", "eine", "ist", "mit", "von", "zu", "für", "auf", "ich", "sie", "wir", "hallo", "danke", "bitte", "guten", "tag", "ja", "nein", "wie", "den", "dem", "des", "im", "am", "in", "es", "sich", "nicht", "aber", "oder", "mehr", "mein", "sehr", "gut", "alles", "tun", "kann", "habe", "hat", "sein", "haben"
+      ]),
+      it: new Set([
+        "il", "la", "di", "che", "un", "una", "in", "con", "per", "come", "ciao", "grazie", "questo", "questa", "noi", "voi", "prego", "sì", "no", "i", "gli", "le", "del", "al", "lo", "su", "ma", "o", "più", "mio", "molto", "bene", "tutto", "tutti", "fare", "voglio", "posso", "ha", "sono", "essere", "avere"
+      ]),
+      pt: new Set([
+        "o", "a", "de", "que", "um", "uma", "em", "com", "para", "como", "olá", "obrigado", "obrigada", "este", "esta", "nós", "você", "sim", "não", "os", "as", "dos", "das", "ao", "aos", "mas", "ou", "mais", "meu", "minha", "muito", "bem", "tudo", "todos", "fazer", "quero", "posso", "tem", "sou", "ser", "ter"
+      ])
+    };
+
+    for (const word of words) {
+      // Strip punctuation from word
+      const cleanedWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
+      for (const lang in wordLists) {
+        if (wordLists[lang].has(cleanedWord)) {
+          scores[lang]++;
+        }
+      }
+    }
+
+    // Find the language with the highest score
+    let maxLang = "en";
+    let maxScore = 0;
+    for (const lang in scores) {
+      if (scores[lang] > maxScore) {
+        maxScore = scores[lang];
+        maxLang = lang;
+      }
+    }
+
+    return maxScore > 0 ? maxLang : "en";
+  };
+
   const speakMessage = (text: string) => {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
 
@@ -184,16 +308,75 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
     const cleanedText = stripMarkdownForSpeech(text);
     const utterance = new SpeechSynthesisUtterance(cleanedText);
 
-    // Pick a natural English voice if available
-    const voices = window.speechSynthesis.getVoices();
-    const naturalVoice = voices.find(v => v.lang.startsWith("en") && v.name.includes("Natural")) ||
-                         voices.find(v => v.lang.startsWith("en") && (v.name.includes("Google") || v.name.includes("Apple"))) ||
-                         voices.find(v => v.lang.startsWith("en")) ||
-                         voices[0];
+    // Automatically detect the language of the sentence
+    const detectedLang = detectLanguage(cleanedText);
+    console.log(`🗣️ Speech auto-detected language: "${detectedLang}" for: "${cleanedText.substring(0, 45)}..."`);
 
-    if (naturalVoice) {
-      utterance.voice = naturalVoice;
+    const voicesList = window.speechSynthesis.getVoices();
+    
+    // Filter voices matching the detected language prefix (e.g. "en", "id", "es", "fr", "de")
+    let langVoices = voicesList.filter(v => v.lang.toLowerCase().startsWith(detectedLang));
+    
+    // Fallback if no matching voices found for the detected language: try checking name/description
+    if (langVoices.length === 0) {
+      if (detectedLang === "id") {
+        langVoices = voicesList.filter(v => v.name.toLowerCase().includes("indonesia") || v.lang.toLowerCase().includes("id"));
+      } else if (detectedLang === "es") {
+        langVoices = voicesList.filter(v => v.name.toLowerCase().includes("spanish") || v.name.toLowerCase().includes("espan") || v.lang.toLowerCase().startsWith("es"));
+      } else if (detectedLang === "fr") {
+        langVoices = voicesList.filter(v => v.name.toLowerCase().includes("french") || v.lang.toLowerCase().startsWith("fr"));
+      } else if (detectedLang === "de") {
+        langVoices = voicesList.filter(v => v.name.toLowerCase().includes("german") || v.lang.toLowerCase().startsWith("de"));
+      } else if (detectedLang === "ja") {
+        langVoices = voicesList.filter(v => v.name.toLowerCase().includes("japanese") || v.lang.toLowerCase().startsWith("ja"));
+      } else if (detectedLang === "ko") {
+        langVoices = voicesList.filter(v => v.name.toLowerCase().includes("korean") || v.lang.toLowerCase().startsWith("ko"));
+      } else if (detectedLang === "zh") {
+        langVoices = voicesList.filter(v => v.name.toLowerCase().includes("chinese") || v.lang.toLowerCase().startsWith("zh"));
+      }
     }
+
+    // Ultimate fallback if still no language matching voices are found: use English ("en")
+    if (langVoices.length === 0) {
+      langVoices = voicesList.filter(v => v.lang.toLowerCase().startsWith("en"));
+    }
+
+    // Sort to prioritize premium/natural/neural/US-native voices for maximum speech similarity
+    const sortedLangVoices = [...langVoices].sort((a, b) => {
+      const score = (v: SpeechSynthesisVoice) => {
+        let s = 0;
+        const nameLower = v.name.toLowerCase();
+        const langLower = v.lang.toLowerCase();
+
+        // Extra boost for US native English if English is requested
+        if (detectedLang === "en" && (langLower === "en-us" || langLower === "en_us")) {
+          s += 200;
+        }
+
+        if (nameLower.includes("natural")) s += 150;
+        if (nameLower.includes("neural")) s += 100;
+        if (nameLower.includes("online")) s += 80;
+        if (nameLower.includes("google")) s += 60;
+        if (nameLower.includes("samantha")) s += 50;
+        if (nameLower.includes("apple")) s += 40;
+        if (nameLower.includes("microsoft")) s += 30;
+        if (nameLower.includes("enhanced")) s += 20;
+
+        return s;
+      };
+      return score(b) - score(a);
+    });
+
+    const chosenVoice = sortedLangVoices[0] || voicesList[0];
+
+    if (chosenVoice) {
+      utterance.voice = chosenVoice;
+      utterance.lang = chosenVoice.lang;
+    }
+
+    // Set high quality speech dynamics for maximum natural human rhythm
+    utterance.rate = 0.96; 
+    utterance.pitch = 1.0;
 
     utterance.onstart = () => {
       setIsSpeaking(true);
@@ -370,6 +553,9 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
       }
 
       if (res.ok) {
+        if (data?.meta?.modelUsed) {
+          setCurrentModel(data.meta.modelUsed);
+        }
         setMessages((prev) => [
           ...prev,
           {
@@ -915,7 +1101,13 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
                     isDark ? "text-zinc-500" : "text-zinc-400"
                   }`}>
                     <Sparkles size={10} className="text-blue-500" />
-                    Powered by Gemini 3.5
+                    by {
+                      currentModel.toLowerCase().includes("gemini-3.5-flash") ? "Gemini 3.5" :
+                      currentModel.toLowerCase().includes("gemini-3.1-flash-lite") ? "Gemini 3.1 Lite" :
+                      currentModel.toLowerCase().includes("gemini-flash-latest") ? "Gemini Flash" :
+                      currentModel.toLowerCase().includes("gemini-3.1-pro") ? "Gemini 3.1 Pro" :
+                      currentModel.replace("gemini-", "Gemini ").split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
+                    }
                   </span>
 
                   <span className="text-[10px] text-zinc-500/50 select-none">•</span>
@@ -950,7 +1142,7 @@ export default function RasendAI({ isDark, triggerHaptic }: RasendAIProps) {
                             exit={{ opacity: 0, y: 8, scale: 0.95 }}
                             transition={{ duration: 0.15 }}
                             style={{ bottom: "calc(100% + 8px)" }}
-                            className={`absolute left-0 z-40 w-64 p-3.5 rounded-2xl border shadow-xl flex flex-col gap-2 backdrop-blur-xl ${
+                            className={`absolute left-[-110px] sm:left-[-60px] md:left-0 z-40 w-64 p-3.5 rounded-2xl border shadow-xl flex flex-col gap-2 backdrop-blur-xl ${
                               isDark 
                                 ? "bg-zinc-950/95 border-white/10 text-zinc-300 shadow-black/80" 
                                 : "bg-white/95 border-zinc-200/85 text-zinc-700 shadow-zinc-200/70"

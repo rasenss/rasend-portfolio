@@ -25,7 +25,7 @@ export default function App() {
 
   // Initialize and synchronise the background audio loop
   useEffect(() => {
-    const audio = new Audio('/Backsound-Portfolio-Music.mp3');
+    const audio = new Audio('/Backsound-Portfolio-Music-Rihanna.mp3');
     audio.loop = true;
     audio.volume = 0.35; // optimal friendly cozy volume
     audioRef.current = audio;
