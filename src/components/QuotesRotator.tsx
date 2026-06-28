@@ -99,11 +99,12 @@ export default function QuotesRotator({ isDark, triggerHaptic, variant = 'footer
       <AnimatePresence mode="wait">
         <motion.div
           key={quoteIdx}
-          className="w-full flex flex-col items-center justify-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.4 }}
+          className="w-full flex flex-col items-center justify-center transform-gpu"
+          initial={{ opacity: 0, rotateY: -65, y: 15, z: -40 }}
+          animate={{ opacity: 1, rotateY: 0, y: 0, z: 0 }}
+          exit={{ opacity: 0, rotateY: 65, y: -15, z: -40 }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+          style={{ transformStyle: 'preserve-3d', backfaceVisibility: 'hidden' }}
         >
           {/* Main Latin Quote */}
           <motion.div

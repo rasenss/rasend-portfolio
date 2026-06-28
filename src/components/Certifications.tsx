@@ -5,6 +5,7 @@ import { certifications, personalInfo } from '../data';
 import { Certification } from '../types';
 import { WindowControls } from './WindowControls';
 import { MyPdfViewer } from './MyPdfViewer';
+import { Tilt3D } from './Tilt3D';
 
 interface CertificationsProps {
   isDark: boolean;
@@ -239,22 +240,22 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
           <div className="space-y-6">
             <div className="flex flex-col gap-6">
               {filteredCertifications.slice(0, visibleCount).map((cert, index) => (
-              <motion.div
-                key={`${selectedOrg}-${searchQuery}-${cert.id}`}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ 
-                  duration: 0.28,
-                  delay: Math.min(index * 0.035, 0.18),
-                  ease: [0.215, 0.610, 0.355, 1.000]
-                }}
-                whileHover={{ y: -3 }}
-                className={`rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden transform-gpu will-change-[transform,opacity] ${
-                  isDark 
-                    ? 'glass-panel-dark hover:border-blue-500/20' 
-                    : 'glass-panel-light hover:border-blue-500/10'
-                }`}
-              >
+              <Tilt3D key={`${selectedOrg}-${searchQuery}-${cert.id}`} max={3} scale={1.015} className="w-full">
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.28,
+                    delay: Math.min(index * 0.035, 0.18),
+                    ease: [0.215, 0.610, 0.355, 1.000]
+                  }}
+                  whileHover={{ y: -3 }}
+                  className={`rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden transform-gpu will-change-[transform,opacity] ${
+                    isDark 
+                      ? 'glass-panel-dark hover:border-blue-500/20' 
+                      : 'glass-panel-light hover:border-blue-500/10'
+                  }`}
+                >
                 {/* Left Column info details */}
                 <div className="flex flex-col sm:flex-row items-start gap-5 sm:gap-6">
                   <div className="relative group/thumb h-20 w-28 sm:h-24 sm:w-36 rounded-2xl overflow-hidden shrink-0 border border-black/10 dark:border-white/10 shadow-sm flex items-center justify-center bg-black/5 dark:bg-white/5 p-1.5">
@@ -330,6 +331,7 @@ export default function Certifications({ isDark, triggerHaptic }: Certifications
                   </div>
 
                 </motion.div>
+              </Tilt3D>
               ))}
             </div>
 

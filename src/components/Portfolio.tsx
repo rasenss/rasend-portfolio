@@ -4,6 +4,7 @@ import { ExternalLink, Github, Layers, ArrowLeft, ArrowUpRight, Search, Heart, S
 import { projects } from '../data';
 import { Project } from '../types';
 import { WindowControls } from './WindowControls';
+import { Tilt3D } from './Tilt3D';
 
 interface PortfolioProps {
   isDark: boolean;
@@ -247,23 +248,22 @@ export default function Portfolio({ isDark, triggerHaptic }: PortfolioProps) {
           {filteredProjects.map((p, pIdx) => {
             const isLiked = likedProjects[p.id] || false;
             return (
-              <motion.div
-                key={`${activeCategory}-${p.id}`}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ 
-                  duration: 0.28,
-                  delay: Math.min(pIdx * 0.03, 0.18),
-                  ease: [0.215, 0.610, 0.355, 1.000]
-                }}
-                whileHover={{ scale: 1.015 }}
-                onClick={() => handleOpenProject(p)}
-                className={`group rounded-3xl overflow-hidden cursor-pointer border flex flex-col justify-between transform-gpu will-change-[transform,opacity] ${
-                  isDark 
-                    ? 'glass-panel-dark border-white/5 hover:border-white/10' 
-                    : 'glass-panel-light border-black/5 hover:border-black/10'
-                }`}
-              >
+              <Tilt3D key={`${activeCategory}-${p.id}`} max={6} scale={1.02} className="w-full h-full flex flex-col justify-between">
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.28,
+                    delay: Math.min(pIdx * 0.03, 0.18),
+                    ease: [0.215, 0.610, 0.355, 1.000]
+                  }}
+                  onClick={() => handleOpenProject(p)}
+                  className={`group rounded-3xl overflow-hidden cursor-pointer border flex flex-col justify-between h-full transform-gpu will-change-[transform,opacity] ${
+                    isDark 
+                      ? 'glass-panel-dark border-white/5 hover:border-white/10' 
+                      : 'glass-panel-light border-black/5 hover:border-black/10'
+                  }`}
+                >
                 
                 {/* Decorative Mockup display frame representation */}
                 <div className={`relative h-auto aspect-video w-full bg-gradient-to-tr ${p.imageColor} flex items-center justify-center overflow-hidden p-3`}>
@@ -370,6 +370,7 @@ export default function Portfolio({ isDark, triggerHaptic }: PortfolioProps) {
                   </div>
 
                 </motion.div>
+              </Tilt3D>
               );
             })}
         </div>

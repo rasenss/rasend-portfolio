@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Linkedin, Github, Instagram, Mail, ArrowUpRight } from 'lucide-react';
 import { personalInfo } from '../data';
+import { Tilt3D } from './Tilt3D';
 
 const DiscordIcon = ({ size = 20, ...props }: { size?: number } & React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -153,14 +154,15 @@ export default function Hero({ isDark, triggerHaptic }: HeroProps) {
       </div>
 
       <div className="w-full max-w-4xl mx-auto z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className={`relative rounded-[24px] sm:rounded-[40px] px-4 sm:px-12 py-12 sm:py-16 text-center ${
-            isDark ? 'glass-panel-dark' : 'glass-panel-light'
-          }`}
-        >
+        <Tilt3D max={6} scale={1.01} className="w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className={`relative rounded-[24px] sm:rounded-[40px] px-4 sm:px-12 py-12 sm:py-16 text-center ${
+              isDark ? 'glass-panel-dark' : 'glass-panel-light'
+            }`}
+          >
           {/* Headline Name - Mechanical split-flap rolling billboard screen simulation */}
           <motion.h1
             id="hero-split-flap-title"
@@ -303,6 +305,7 @@ export default function Hero({ isDark, triggerHaptic }: HeroProps) {
           </div>
 
         </motion.div>
+        </Tilt3D>
       </div>
 
       {/* Decorative Slide Indicator for mouse scrolls */}

@@ -12,6 +12,7 @@ import Connect from './components/Connect';
 import QuotesRotator from './components/QuotesRotator';
 import { personalInfo } from './data';
 import RasendAI from './components/RasendAI';
+import Constellation3DBackground from './components/Constellation3DBackground';
 
 export default function App() {
   // Theme state defaulting to Light Mode as requested
@@ -211,6 +212,8 @@ export default function App() {
   return (
     <div className={`min-h-screen relative font-sans transition-colors duration-500 overflow-x-hidden ${isDark ? 'dark bg-[#050505] text-white' : 'bg-neutral-50 text-gray-900'}`}>
       
+      <Constellation3DBackground isDark={isDark} isPlaying={isPlaying} />
+
       {/* Immersive Atmospheric Backdrop Glowing meshes */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <div className={`absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full blur-[140px] bg-blue-500/10 transition-opacity duration-500 ${
@@ -269,39 +272,46 @@ export default function App() {
           <Connect isDark={isDark} triggerHaptic={triggerHaptic} />
         </main>
 
-        {/* Roman Empire Cinematic Animated Footer */}
-        <footer className={`transition-colors duration-500 border-t py-12 px-6 sm:px-12 text-center relative z-10 overflow-hidden ${
-          isDark 
-            ? 'bg-black border-blue-500/10' 
-            : 'bg-white border-blue-500/15'
-        }`}>
-          <div className="max-w-4xl mx-auto flex flex-col items-center">
-            
-            {/* Animated Quotes Rotator inside footer */}
-            <div className="mb-10 w-full flex justify-center">
-              <QuotesRotator isDark={isDark} triggerHaptic={triggerHaptic} variant="footer" />
-            </div>
+        {/* Beautiful Floating Card Footer Container */}
+        <div className="px-6 pb-16 pt-4 relative z-10">
+          <footer className={`max-w-6xl mx-auto transition-all duration-500 rounded-3xl py-12 px-6 sm:px-12 text-center border shadow-xl backdrop-blur-md overflow-hidden relative ${
+            isDark 
+              ? 'bg-black/40 border-blue-500/10 shadow-blue-950/10' 
+              : 'bg-white/70 border-blue-500/15 shadow-blue-100/30'
+          }`}>
+            {/* Ambient inner soft glowing backdrop */}
+            <div className={`absolute -right-20 -bottom-20 w-[300px] h-[300px] rounded-full blur-[100px] transition-opacity duration-500 pointer-events-none ${
+              isDark ? 'bg-blue-500/5 opacity-100' : 'bg-blue-500/10 opacity-60'
+            }`}></div>
 
-            {/* Bottom Classical Roman Numeral Ledger Copyright */}
-            <div className="flex flex-col items-center gap-3">
-              <span className={`font-roman tracking-[0.18em] text-[10px] sm:text-xs uppercase ${
-                isDark ? 'text-blue-500/40' : 'text-blue-800/55'
-              }`}>
-                © MMXXVI · RASENDRIYA KHANSA · OMNIA OPERA
-              </span>
+            <div className="max-w-4xl mx-auto flex flex-col items-center relative z-10">
               
-              {/* Secret interactive credits toggle */}
-              <div className={`flex items-center gap-4 text-[9px] font-mono transition-colors mt-3 ${
-                isDark ? 'text-blue-500/20 hover:text-blue-500/40' : 'text-blue-500/40 hover:text-blue-500/60'
-              }`}>
-                <span>REFINED IN Pacitan</span>
-                <span>•</span>
-                <span>LATITUDE -8.203°</span>
+              {/* Animated Quotes Rotator inside footer */}
+              <div className="mb-10 w-full flex justify-center">
+                <QuotesRotator isDark={isDark} triggerHaptic={triggerHaptic} variant="footer" />
               </div>
-            </div>
 
-          </div>
-        </footer>
+              {/* Bottom Classical Roman Numeral Ledger Copyright */}
+              <div className="flex flex-col items-center gap-3">
+                <span className={`font-roman tracking-[0.18em] text-[10px] sm:text-xs uppercase ${
+                  isDark ? 'text-blue-500/40' : 'text-blue-800/55'
+                }`}>
+                  © MMXXVI · RASENDRIYA KHANSA · OMNIA OPERA
+                </span>
+                
+                {/* Secret interactive credits toggle */}
+                <div className={`flex items-center gap-4 text-[9px] font-mono transition-colors mt-3 ${
+                  isDark ? 'text-blue-500/20 hover:text-blue-500/40' : 'text-blue-500/40 hover:text-blue-500/60'
+                }`}>
+                  <span>REFINED IN Pacitan</span>
+                  <span>•</span>
+                  <span>LATITUDE -8.203°</span>
+                </div>
+              </div>
+
+            </div>
+          </footer>
+        </div>
         
         {/* Floating AI Agent Copilot */}
         <RasendAI isDark={isDark} triggerHaptic={triggerHaptic} />
@@ -314,9 +324,5 @@ export default function App() {
 
 // Compact helper Separator element
 function HorizontalSeparator({ isDark }: { isDark: boolean }) {
-  return (
-    <div className="max-w-5xl mx-auto px-4 md:px-0">
-      <div className={`h-[1px] w-full ${isDark ? 'bg-white/[0.05]' : 'bg-black/[0.05]'}`} />
-    </div>
-  );
+  return <div className="py-5" />;
 }

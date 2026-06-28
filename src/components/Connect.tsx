@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Send, CheckCircle2, RefreshCw, Radio } from 'lucide-react';
 import { personalInfo } from '../data';
 import { WindowControls } from './WindowControls';
+import { Tilt3D } from './Tilt3D';
 
 interface ConnectProps {
   isDark: boolean;
@@ -396,17 +397,18 @@ export default function Connect({ isDark, triggerHaptic }: ConnectProps) {
         </div>
 
         {/* Modern Mainframe Window wrapping the dual contact/quiz deck */}
-        <motion.div
-          initial={{ opacity: 0, y: 25 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-20px' }}
-          transition={{ duration: 0.4, delay: 0.05, ease: 'easeOut' }}
-          className={`rounded-3xl overflow-hidden shadow-xl transition-all duration-500 ${
-            isDark 
-              ? 'glass-panel-dark shadow-black/80' 
-              : 'glass-panel-light shadow-zinc-200/20'
-          }`}
-        >
+        <Tilt3D max={4} scale={1.005} className="w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-20px' }}
+            transition={{ duration: 0.4, delay: 0.05, ease: 'easeOut' }}
+            className={`rounded-3xl overflow-hidden shadow-xl transition-all duration-500 ${
+              isDark 
+                ? 'glass-panel-dark shadow-black/80' 
+                : 'glass-panel-light shadow-zinc-200/20'
+            }`}
+          >
           {/* Mainframe Interface Header bar */}
           <div className={`flex items-center justify-between gap-2 px-4 sm:px-6 py-4 border-b select-none transition-all duration-350 ${
             isDark ? 'bg-[#18181b]/30 border-white/5' : 'bg-[#ffffff]/35 border-black/5'
@@ -819,6 +821,7 @@ export default function Connect({ isDark, triggerHaptic }: ConnectProps) {
         </div>
       </motion.div>
     </motion.div>
+    </Tilt3D>
 
     </div>
   </section>

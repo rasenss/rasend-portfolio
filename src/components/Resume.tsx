@@ -4,6 +4,7 @@ import { Download, Linkedin, MapPin, Phone, Mail, ChevronDown, ChevronUp, Gradua
 import { jsPDF } from 'jspdf';
 import { personalInfo, timelineItems, certifications, skills } from '../data';
 import { WindowControls } from './WindowControls';
+import { Tilt3D } from './Tilt3D';
 
 interface ResumeProps {
   isDark: boolean;
@@ -452,17 +453,18 @@ export default function Resume({ isDark, triggerHaptic }: ResumeProps) {
         </div>
 
         {/* macOS Style Window Frame around Resume contents */}
-        <motion.div
-          initial={{ opacity: 0, y: 25 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-20px' }}
-          transition={{ duration: 0.4, delay: 0.05, ease: 'easeOut' }}
-          className={`rounded-3xl overflow-hidden shadow-2xl transition-all duration-300 mb-6 ${
-            isDark 
-              ? 'glass-panel-dark shadow-black/80' 
-              : 'glass-panel-light shadow-zinc-200/50'
-          }`}
-        >
+        <Tilt3D max={3} scale={1.002} className="w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-20px' }}
+            transition={{ duration: 0.4, delay: 0.05, ease: 'easeOut' }}
+            className={`rounded-3xl overflow-hidden shadow-2xl transition-all duration-300 mb-6 ${
+              isDark 
+                ? 'glass-panel-dark shadow-black/80' 
+                : 'glass-panel-light shadow-zinc-200/50'
+            }`}
+          >
           {/* Window Upper Navigation TitleBar */}
           <div className={`flex items-center justify-between gap-2 px-4 sm:px-6 py-4 border-b select-none transition-all duration-350 ${
             isDark ? 'bg-[#18181b]/40 border-white/5' : 'bg-[#ffffff]/40 border-black/5'
@@ -747,6 +749,7 @@ export default function Resume({ isDark, triggerHaptic }: ResumeProps) {
         </div>
         </motion.div>
       </motion.div>
+      </Tilt3D>
 
       </div>
     </section>
