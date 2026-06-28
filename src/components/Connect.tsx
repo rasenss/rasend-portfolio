@@ -410,7 +410,7 @@ export default function Connect({ isDark, triggerHaptic }: ConnectProps) {
             }`}
           >
           {/* Mainframe Interface Header bar */}
-          <div className={`flex items-center justify-between gap-2 px-4 sm:px-6 py-4 border-b select-none transition-all duration-350 ${
+          <div className={`relative flex items-center justify-between gap-2 px-4 sm:px-6 py-4 border-b select-none transition-all duration-350 ${
             isDark ? 'bg-[#18181b]/30 border-white/5' : 'bg-[#ffffff]/35 border-black/5'
           }`}>
             <WindowControls 
@@ -419,15 +419,19 @@ export default function Connect({ isDark, triggerHaptic }: ConnectProps) {
               onMaximize={() => { triggerHaptic(); setIsMinimized(false); }}
             />
 
-            <div className={`px-4 py-1.5 rounded-xl font-mono text-[9px] sm:text-xs tracking-wider border select-all ${
-              isDark 
-                ? 'bg-[#0f0f13] border-zinc-800 text-zinc-400' 
-                : 'bg-white border-zinc-205 text-zinc-650 shadow-sm'
-            }`}>
-              /connect
+            {/* Centered File Path Address */}
+            <div className="absolute left-1/2 -translate-x-1/2">
+              <div className={`px-5 py-1.5 rounded-full font-mono text-[10px] sm:text-xs tracking-wider border transition-all duration-300 ${
+                isDark 
+                  ? 'bg-zinc-900/40 border-white/10 text-gray-400 hover:border-white/20' 
+                  : 'bg-white/60 border-zinc-300/60 text-zinc-700 hover:border-zinc-400/80'
+              }`}>
+                /connect
+              </div>
             </div>
 
-            <div className="flex items-center gap-1.5" />
+            {/* Empty space to balance structural layout */}
+            <div className="w-12 h-6" />
           </div>
 
           <motion.div

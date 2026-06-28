@@ -13,7 +13,9 @@ interface Star3D {
   brightness: number; // base brightness
   pulseSpeed: number; // twinkle speed multiplier
   pulsePhase: number; // twinkle offset phase
-  color: string;      // RGB base color template
+  r: number;          // Red color channel
+  g: number;          // Green color channel
+  b: number;          // Blue color channel
   speedFactor: number;// individual star speed variation
 }
 
@@ -92,28 +94,32 @@ export default function Constellation3DBackground({ isDark, isPlaying = false }:
 
     // Configuration
     const maxDepth = 1500;
-    const starCount = 1400; // Massively increased high-density celestial map!
+    
+    // Dynamic Performance scaling based on viewport width:
+    // This allows buttery-smooth 60fps on mobile while presenting a breathtakingly full starfield on desktop.
+    const isMobileDevice = window.innerWidth < 768;
+    const starCount = isMobileDevice ? 150 : 350;
     const stars: Star3D[] = [];
 
-    // Helper to distribute stars with color variations representing real cosmic types
-    const getRandomStarColor = (isDarkTheme: boolean) => {
+    // Helper to distribute stars with pre-parsed RGB tuples
+    const getRandomStarRGB = (isDarkTheme: boolean) => {
       const darkColors = [
-        'rgba(255, 255, 255, opacity)', // Pure brilliant white (high weight)
-        'rgba(255, 255, 255, opacity)',
-        'rgba(255, 255, 255, opacity)',
-        'rgba(167, 139, 250, opacity)', // Cosmic Lavender/Violet glow (Aesthetic)
-        'rgba(56, 189, 248, opacity)',  // Vibrant sky-blue
-        'rgba(224, 242, 254, opacity)', // Soft ice blue star (O/B type)
-        'rgba(244, 63, 94, opacity)',   // Soft cosmic rose (Aesthetic)
-        'rgba(254, 243, 199, opacity)', // Golden amber star (M/K type)
+        { r: 255, g: 255, b: 255 }, // Pure brilliant white (high weight)
+        { r: 255, g: 255, b: 255 },
+        { r: 255, g: 255, b: 255 },
+        { r: 167, g: 139, b: 250 }, // Cosmic Lavender/Violet glow (Aesthetic)
+        { r: 56, g: 189, b: 248 },  // Vibrant sky-blue
+        { r: 224, g: 242, b: 254 }, // Soft ice blue star (O/B type)
+        { r: 244, g: 63, b: 94 },   // Soft cosmic rose (Aesthetic)
+        { r: 254, g: 243, b: 199 }, // Golden amber star (M/K type)
       ];
       const lightColors = [
-        'rgba(29, 78, 216, opacity)',   // High-contrast celestial royal blue
-        'rgba(67, 56, 202, opacity)',   // Deep celestial indigo
-        'rgba(109, 40, 217, opacity)',  // Mystic cosmic violet
-        'rgba(15, 118, 110, opacity)',  // Space emerald teal
-        'rgba(190, 24, 74, opacity)',   // Celestial rose/ruby
-        'rgba(180, 83, 9, opacity)',    // Golden solar amber
+        { r: 29, g: 78, b: 216 },   // High-contrast celestial royal blue
+        { r: 67, g: 56, b: 202 },   // Deep celestial indigo
+        { r: 109, g: 40, b: 217 },  // Mystic cosmic violet
+        { r: 15, g: 118, b: 110 },  // Space emerald teal
+        { r: 190, g: 24, b: 74 },   // Celestial rose/ruby
+        { r: 180, g: 83, b: 9 },    // Golden solar amber
       ];
       const list = isDarkTheme ? darkColors : lightColors;
       return list[Math.floor(Math.random() * list.length)];
@@ -125,9 +131,6 @@ export default function Constellation3DBackground({ isDark, isPlaying = false }:
       const radius = Math.pow(Math.random(), 0.75) * 1700; // Expanded radius for gorgeous dispersion
       
       // We categorize stars into three distinct aesthetic tiers:
-      // Tier 1: Tiny, sparkling stellar dust particles (65% of stars)
-      // Tier 2: Medium standard shimmering stars (27% of stars)
-      // Tier 3: Rare brilliant major celestial nodes / super-giants with rich glows (8% of stars)
       const rand = Math.random();
       let baseSize = 0.5;
       let brightness = 0.35 + Math.random() * 0.5;
@@ -150,6 +153,8 @@ export default function Constellation3DBackground({ isDark, isPlaying = false }:
         pulseSpeed = 0.8 + Math.random() * 1.8;
       }
 
+      const rgb = getRandomStarRGB(isDark);
+
       stars.push({
         x: Math.cos(angle) * radius,
         y: Math.sin(angle) * radius * 0.85,
@@ -158,7 +163,9 @@ export default function Constellation3DBackground({ isDark, isPlaying = false }:
         brightness,
         pulseSpeed,
         pulsePhase: Math.random() * Math.PI * 2,
-        color: getRandomStarColor(isDark),
+        r: rgb.r,
+        g: rgb.g,
+        b: rgb.b,
         speedFactor: 0.6 + Math.random() * 0.8,
       });
     }
@@ -266,146 +273,121 @@ export default function Constellation3DBackground({ isDark, isPlaying = false }:
 
       // Standard focal length for realistic perspective mapping
       const fov = 380;
+      const boxHeight = height * 4;
 
-      // Map, update, and sort stars for painter's depth rendering
-      const projectedStars = stars
-        .map((star) => {
-          // 2. Flyby 3D forward motion: decrease Z coordinate to fly closer
-          const flightSpeed = (isPlaying ? 4.8 : 1.1) * star.speedFactor;
-          star.z -= flightSpeed;
+      // Single-pass render loop for 100% efficient draw calls (zero GC overhead)
+      for (let i = 0; i < stars.length; i++) {
+        const star = stars[i];
 
-          // If star passes the screen, warp it seamlessly back to the infinite far plane
-          if (star.z <= 10) {
-            star.z = maxDepth;
-            const angle = Math.random() * Math.PI * 2;
-            const radius = Math.pow(Math.random(), 0.75) * 1700;
-            star.x = Math.cos(angle) * radius;
-            star.y = Math.sin(angle) * radius * 0.85;
-            
-            // Re-apply tier characteristics on wrap to maintain rich diversity
-            const rand = Math.random();
-            if (rand < 0.65) {
-              star.baseSize = 0.40 + Math.random() * 0.50;
-              star.brightness = 0.40 + Math.random() * 0.45;
-            } else if (rand < 0.92) {
-              star.baseSize = 1.0 + Math.random() * 0.9;
-              star.brightness = 0.65 + Math.random() * 0.35;
-            } else {
-              star.baseSize = 2.0 + Math.random() * 1.8;
-              star.brightness = 0.90 + Math.random() * 0.10;
-            }
-            star.pulsePhase = Math.random() * Math.PI * 2;
+        // 2. Flyby 3D forward motion: decrease Z coordinate to fly closer
+        const flightSpeed = (isPlaying ? 4.8 : 1.1) * star.speedFactor;
+        star.z -= flightSpeed;
+
+        // If star passes the screen, warp it seamlessly back to the infinite far plane
+        if (star.z <= 10) {
+          star.z = maxDepth;
+          const angle = Math.random() * Math.PI * 2;
+          const radius = Math.pow(Math.random(), 0.75) * 1700;
+          star.x = Math.cos(angle) * radius;
+          star.y = Math.sin(angle) * radius * 0.85;
+          
+          // Re-apply tier characteristics on wrap to maintain rich diversity
+          const rand = Math.random();
+          if (rand < 0.65) {
+            star.baseSize = 0.40 + Math.random() * 0.50;
+            star.brightness = 0.40 + Math.random() * 0.45;
+          } else if (rand < 0.92) {
+            star.baseSize = 1.0 + Math.random() * 0.9;
+            star.brightness = 0.65 + Math.random() * 0.35;
+          } else {
+            star.baseSize = 2.0 + Math.random() * 1.8;
+            star.brightness = 0.90 + Math.random() * 0.10;
           }
+          star.pulsePhase = Math.random() * Math.PI * 2;
+        }
 
-          // 3. Infinite Vertical Wrap-Around scrolling:
-          // Shifts the virtual Y coordinates based on page scroll, then wraps inside a 3D box height boundary.
-          // This ensures that stars scroll dynamically with the user, creating beautiful parallax, 
-          // AND guarantees stars never run out, remaining fully populated at the bottom of the long site.
-          const boxHeight = height * 4;
-          let virtualY = star.y - scrollOffset;
-          virtualY = ((virtualY + boxHeight / 2) % boxHeight);
-          if (virtualY < 0) virtualY += boxHeight;
-          virtualY -= boxHeight / 2;
+        // 3. Infinite Vertical Wrap-Around scrolling
+        let virtualY = star.y - scrollOffset;
+        virtualY = ((virtualY + boxHeight / 2) % boxHeight);
+        if (virtualY < 0) virtualY += boxHeight;
+        virtualY -= boxHeight / 2;
 
-          // Camera orbit yaw/pitch rotation based on cosmic clock + mouse
-          const yawAngle = timeRef.current * 0.015 - mouseRef.current.x * 0.05;
-          const pitchAngle = mouseRef.current.y * 0.04;
+        // Camera orbit yaw/pitch rotation based on cosmic clock + mouse
+        const yawAngle = timeRef.current * 0.015 - mouseRef.current.x * 0.05;
+        const pitchAngle = mouseRef.current.y * 0.04;
 
-          const cosYaw = Math.cos(yawAngle);
-          const sinYaw = Math.sin(yawAngle);
-          const cosPitch = Math.cos(pitchAngle);
-          const sinPitch = Math.sin(pitchAngle);
+        const cosYaw = Math.cos(yawAngle);
+        const sinYaw = Math.sin(yawAngle);
+        const cosPitch = Math.cos(pitchAngle);
+        const sinPitch = Math.sin(pitchAngle);
 
-          // Yaw rotation (around Y axis)
-          let rx = star.x * cosYaw - star.z * sinYaw;
-          let rz = star.x * sinYaw + star.z * cosYaw;
+        // Yaw rotation (around Y axis)
+        let rx = star.x * cosYaw - star.z * sinYaw;
+        let rz = star.x * sinYaw + star.z * cosYaw;
 
-          // Pitch rotation (around X axis)
-          let ry = virtualY * cosPitch - rz * sinPitch;
-          rz = virtualY * sinPitch + rz * cosPitch;
+        // Pitch rotation (around X axis)
+        let ry = virtualY * cosPitch - rz * sinPitch;
+        rz = virtualY * sinPitch + rz * cosPitch;
 
-          // Check if the star is behind the camera frustum
-          if (rz <= 10) return null;
+        // Check if the star is behind the camera frustum
+        if (rz <= 10) continue;
 
-          // Perspective Projection
-          const scale = fov / rz;
-          const sx = cx + rx * scale;
-          const sy = cy + ry * scale;
+        // Perspective Projection
+        const scale = fov / rz;
+        const sx = cx + rx * scale;
+        const sy = cy + ry * scale;
 
-          // Exclude stars that project far outside screen bounds
-          if (sx < -200 || sx > width + 200 || sy < -200 || sy > height + 200) {
-            return null;
-          }
+        // Exclude stars that project far outside screen bounds
+        if (sx < -100 || sx > width + 100 || sy < -100 || sy > height + 100) {
+          continue;
+        }
 
-          // Fog / Depth opacity mapping
-          // Deep stars are faint, approaching stars become bright, then fade out smoothly right before warping to prevent popping
-          let depthFog = 1.0 - rz / maxDepth; // 0 (far) to 1 (near)
-          let opacity = depthFog;
+        // Fog / Depth opacity mapping
+        let depthFog = 1.0 - rz / maxDepth;
+        let opacity = depthFog;
 
-          // Fade out stars when they are extremely close (rz < 150) to make transition flawless
-          if (rz < 150) {
-            opacity *= (rz - 10) / 140;
-          }
+        // Fade out stars when they are extremely close (rz < 150) to make transition flawless
+        if (rz < 150) {
+          opacity *= (rz - 10) / 140;
+        }
 
-          return { sx, sy, scale, opacity, star, depth: rz };
-        })
-        .filter((item) => item !== null) as {
-          sx: number;
-          sy: number;
-          scale: number;
-          opacity: number;
-          star: Star3D;
-          depth: number;
-        }[];
-
-      // Sort by depth so stars are painted back-to-front (depth-buffer emulator)
-      projectedStars.sort((a, b) => b.depth - a.depth);
-
-      // Draw all Star Nodes
-      projectedStars.forEach(({ sx, sy, scale, opacity, star }) => {
-        // High-fidelity multi-frequency twinkle shimmer
+        // Twinkle calculation
         const freq1 = Math.sin(timeRef.current * 2.5 * star.pulseSpeed + star.pulsePhase);
         const freq2 = Math.cos(timeRef.current * 1.1 * star.pulseSpeed + star.pulsePhase * 1.6);
         const microScintillation = Math.sin(timeRef.current * 7.5 * star.pulseSpeed + star.pulsePhase * 2.0) * 0.12;
         
         const twinkle = (freq1 * 0.30 + freq2 * 0.20 + microScintillation + 0.65) * star.brightness;
         
-        // Boosted base opacity so stars are clearly visible and sparkling across the entire depth range
-        const finalAlpha = Math.max(isDark ? 0.25 : 0.35, Math.min(1.0, (opacity * 0.65 + 0.35) * twinkle * (isDark ? 0.98 : 0.88)));
-
-        // Dynamic scale-adjusted size (slightly boosted size scaling factor)
+        // Base opacities are boosted for spectacular visibility
+        const finalAlpha = Math.max(isDark ? 0.28 : 0.38, Math.min(1.0, (opacity * 0.65 + 0.35) * twinkle * (isDark ? 0.98 : 0.88)));
         const size = Math.max(0.65, star.baseSize * scale * 0.52);
 
-        // Render layered atmospheric bloom glows for larger bright stars in both dark and light modes
-        const bloomThreshold = isDark ? 1.0 : 1.35; // Lower threshold in light theme for extra drama
+        // Render layered atmospheric bloom glows for larger stars with high-performance vector halos
+        const bloomThreshold = isDark ? 1.4 : 1.75; // Pre-calibrated threshold to draw bloom halos only on giants
         if (size > bloomThreshold) {
-          ctx.save();
-          // Use 'screen' for dark mode glow, and 'multiply' for soft, aesthetic light mode halos
-          ctx.globalCompositeOperation = isDark ? 'screen' : 'multiply';
-
-          const auraRadius = size * (isDark ? 6.0 : 5.0); // Richer stellar halo
-          const auraGrad = ctx.createRadialGradient(sx, sy, size * 0.05, sx, sy, auraRadius);
+          const auraRadius = size * (isDark ? 4.5 : 3.8);
           
-          const alphaFactor = isDark ? 0.45 : 0.32; // Calibrated opacity for light vs dark halos
-          const glowColor = star.color.replace('opacity', (finalAlpha * alphaFactor).toFixed(3));
-          auraGrad.addColorStop(0, glowColor);
-          auraGrad.addColorStop(0.35, star.color.replace('opacity', (finalAlpha * (isDark ? 0.18 : 0.12)).toFixed(3)));
-          auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-          ctx.fillStyle = auraGrad;
+          // Draw a soft outer atmosphere circle (super-fast hardware vector rendering)
           ctx.beginPath();
           ctx.arc(sx, sy, auraRadius, 0, Math.PI * 2);
+          const alphaFactor = isDark ? 0.08 : 0.06;
+          ctx.fillStyle = `rgba(${star.r}, ${star.g}, ${star.b}, ${(finalAlpha * alphaFactor).toFixed(2)})`;
           ctx.fill();
 
-          ctx.restore();
+          // Draw an inner bright corona circle for extra lush richness
+          ctx.beginPath();
+          ctx.arc(sx, sy, size * 2.2, 0, Math.PI * 2);
+          const innerAlphaFactor = isDark ? 0.18 : 0.13;
+          ctx.fillStyle = `rgba(${star.r}, ${star.g}, ${star.b}, ${(finalAlpha * innerAlphaFactor).toFixed(2)})`;
+          ctx.fill();
         }
 
-        // Crisp star core circle
+        // Crisp star core circle (using highly performant pre-parsed channels)
         ctx.beginPath();
         ctx.arc(sx, sy, size, 0, Math.PI * 2);
-        ctx.fillStyle = star.color.replace('opacity', finalAlpha.toFixed(2));
+        ctx.fillStyle = `rgba(${star.r}, ${star.g}, ${star.b}, ${finalAlpha.toFixed(2)})`;
         ctx.fill();
-      });
+      }
 
       animFrameRef.current = requestAnimationFrame(tick);
     };

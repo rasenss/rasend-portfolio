@@ -261,7 +261,7 @@ export default function Skills({ isDark, triggerHaptic }: SkillsProps) {
             }`}
           >
           {/* Mainframe Interface Header bar */}
-          <div className={`flex items-center justify-between gap-2 px-4 sm:px-6 py-4 border-b select-none transition-all duration-350 ${
+          <div className={`relative flex items-center justify-between gap-2 px-4 sm:px-6 py-4 border-b select-none transition-all duration-350 ${
             isDark ? 'bg-[#18181b]/30 border-white/5' : 'bg-[#ffffff]/35 border-black/5'
           }`}>
             <WindowControls 
@@ -270,15 +270,19 @@ export default function Skills({ isDark, triggerHaptic }: SkillsProps) {
               onMaximize={() => { triggerHaptic(); setIsMinimized(false); }}
             />
 
-            <div className={`px-4 py-1.5 rounded-xl font-mono text-[9px] sm:text-xs tracking-wider border select-all ${
-              isDark 
-                ? 'bg-zinc-900/60 border-zinc-800 text-zinc-400' 
-                : 'bg-white border-zinc-150 text-zinc-650 shadow-sm'
-            }`}>
-              /skills/{selectedSkill.toLowerCase().replace(/\s+/g, '_')}
+            {/* Centered File Path Address */}
+            <div className="absolute left-1/2 -translate-x-1/2 max-w-[50%] truncate">
+              <div className={`px-4 py-1.5 rounded-full font-mono text-[9px] sm:text-xs tracking-wider border select-all transition-all duration-300 truncate ${
+                isDark 
+                  ? 'bg-zinc-900/40 border-white/10 text-gray-400 hover:border-white/20' 
+                  : 'bg-white/60 border-zinc-300/60 text-zinc-700 hover:border-zinc-400/80'
+              }`}>
+                /skills/{selectedSkill.toLowerCase().replace(/\s+/g, '_')}
+              </div>
             </div>
 
-            <div className="flex items-center gap-1.5" />
+            {/* Empty space to balance structural layout */}
+            <div className="w-12 h-6" />
           </div>
 
           <motion.div

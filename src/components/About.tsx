@@ -135,7 +135,7 @@ export default function About({ isDark, triggerHaptic }: AboutProps) {
             }`}
           >
           {/* Window Upper Navigation TitleBar */}
-          <div className={`flex items-center justify-between gap-2 px-4 sm:px-6 py-4 border-b select-none transition-all duration-350 ${
+          <div className={`relative flex items-center justify-between gap-2 px-4 sm:px-6 py-4 border-b select-none transition-all duration-350 ${
             isDark ? 'bg-[#18181b]/40 border-white/5' : 'bg-[#ffffff]/40 border-black/5'
           }`}>
             {/* Window Dots */}
@@ -145,17 +145,19 @@ export default function About({ isDark, triggerHaptic }: AboutProps) {
               onMaximize={() => { triggerHaptic(); setIsMinimized(false); }}
             />
 
-            {/* Current File Path Address */}
-            <div className={`px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-xl font-mono text-[9px] sm:text-xs tracking-wider border max-w-[130px] min-[375px]:max-w-[180px] sm:max-w-md truncate ${
-              isDark 
-                ? 'bg-zinc-900/60 border-white/5 text-gray-400' 
-                : 'bg-white border-gray-150 text-gray-600'
-            }`}>
-              /about
+            {/* Centered File Path Address */}
+            <div className="absolute left-1/2 -translate-x-1/2">
+              <div className={`px-5 py-1.5 rounded-full font-mono text-[10px] sm:text-xs tracking-wider border transition-all duration-300 ${
+                isDark 
+                  ? 'bg-zinc-900/40 border-white/10 text-gray-400 hover:border-white/20' 
+                  : 'bg-white/60 border-zinc-300/60 text-zinc-700 hover:border-zinc-400/80'
+              }`}>
+                /about
+              </div>
             </div>
 
-            {/* Secure Token representation */}
-            <span className="text-[10px] font-mono tracking-widest text-blue-500/60 font-bold hidden sm:inline" />
+            {/* Empty space to balance structural layout */}
+            <div className="w-12 h-6" />
           </div>
 
           <motion.div
